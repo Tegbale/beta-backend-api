@@ -1,0 +1,151 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model School {
+  id          String       @id @default(uuid()) // Unique identifier for each school
+  name        String // Name of the school
+  email       String       @unique // Unique email for each school same with school admin
+  address     String // Address of the school
+  phone       String // Phone number of the school
+  website     String? // Website URL of the school (optional)
+  logo        String? // URL of the school's logo (optional)
+  description String? // Description of the school (optional)
+  classes     Class[] // One-to-many relationship between school and classes
+  teachers    Teacher[] // One-to-many relationship between school and teachers
+  students    Student[] // One-to-many relationship between school and students
+  events      Event[] // One-to-many relationship between school and events
+  chats       Chat[] // One-to-many relationship between school and chats
+  posts       Post[] // One-to-many relationship between school and posts
+  schoolAdmin SchoolAdmin? // One-to-one relationship with SchoolAdmin
+}
+
+model Class {
+  id        String    @id @default(uuid())
+  name      String // Name of the class
+  nickname  String // Nickname of the class
+  grade     Int // Grade level of the class
+  school    School    @relation(fields: [schoolId], references: [id])
+  schoolId  String // Foreign key to link class to school
+  teacher   Teacher   @relation(fields: [teacherId], references: [id])
+  teacherId String // Foreign key to link class to teacher
+  students  Student[] // One-to-many relationship between class and students
+}
+
+model Teacher {
+  id        String   @id @default(uuid())
+  name      String // Name of the teacher
+  Gender    String // Gender of the teacher
+  email     String // Email of the teacher
+  phone     String // Phone number of the teacher
+  avatar    String? // Optional field for the teacher's avatar
+  school    School   @relation(fields: [schoolId], references: [id])
+  schoolId  String // Foreign key to link teacher to school
+  classes   Class[] // One-to-many relationship between teacher and classes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Student {
+  id         String   @id @default(uuid())
+  name       String // Name of the student
+  gender     String // Gender of the student
+  email      String? // Email of the student
+  phone      String? // Phone number of the student
+  grade      Int // Grade level of the student
+  avatar     String? // Optional field for the student's avatar
+  school     School   @relation(fields: [schoolId], references: [id])
+  schoolId   String // Foreign key to link student to school
+  class      Class    @relation(fields: [classId], references: [id])
+  classId    String // Foreign key to link student to class
+  guardian   Guardian @relation(fields: [guardianId], references: [id])
+  guardianId String // Foreign key to link student to guardian
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Guardian {
+  id        String    @id @default(uuid())
+  name      String // Name of the guardian
+  email     String // Email of the guardian
+  phone     String // Phone number of the guardian
+  avatar    String? // Optional field for the guardian's avatar
+  students  Student[] // One-to-many relationship between guardian and students
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  name      String // Name of the event
+  date      DateTime // Date of the event
+  school    School   @relation(fields: [schoolId], references: [id])
+  schoolId  String // Foreign key to link event to school
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Chat {
+  id        String   @id @default(uuid())
+  message   String? // The chat message (optional if media is present)
+  sender    String // The sender of the message
+  timestamp DateTime // Timestamp of the message
+  mediaUrl  String? // URL of the media file (optional)
+  mediaType String? // Type of the media file (e.g., image, video, audio) (optional)
+  school    School   @relation(fields: [schoolId], references: [id])
+  schoolId  String // Foreign key to link chat to school
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  title     String // Title of the post
+  content   String // Content of the post
+  author    String // Author of the post
+  school    School    @relation(fields: [schoolId], references: [id])
+  schoolId  String // Foreign key to link post to school
+  comments  Comment[] // One-to-many relationship between post and comments
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  content   String // Content of the comment
+  author    String // Author of the comment
+  post      Post?     @relation(fields: [postId], references: [id])
+  postId    String? // Foreign key to link comment to post (optional for nested comments)
+  parent    Comment?  @relation("CommentToComment", fields: [parentId], references: [id])
+  parentId  String? // Foreign key to link comment to parent comment (optional for top-level comments)
+  replies   Comment[] @relation("CommentToComment")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model SuperAdmin {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String? // Optional field for the super admin's avatar
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SchoolAdmin {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique // Unique email for each school admin same with school
+  password  String
+  avatar    String? // Optional field for the school admin's avatar
+  school    School   @relation(fields: [schoolId], references: [id])
+  schoolId  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
