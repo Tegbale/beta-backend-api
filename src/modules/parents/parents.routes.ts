@@ -7,7 +7,12 @@ import * as ctrl from './parents.controller';
 
 const router = Router();
 
-router.use(authenticate, authorize('SUPER_ADMIN', 'SCHOOL_ADMIN'));
+router.use(authenticate);
+
+// Parent can fetch their own wards
+router.get('/me/wards', ctrl.getMyWards);
+
+router.use(authorize('SUPER_ADMIN', 'SCHOOL_ADMIN'));
 
 router.get('/', validate(listQuerySchema, 'query'), ctrl.list);
 router.get('/:id', ctrl.get);

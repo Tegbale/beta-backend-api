@@ -9,7 +9,12 @@ const userSelect = { select: { id: true, firstName: true, lastName: true, avatar
 export const listMessages = async (userId: string, query: ListQuery) => {
   const { page, limit, type } = query;
   const skip = (page - 1) * limit;
-  const where = type === 'sent' ? { senderId: userId } : { receiverId: userId };
+  const where =
+    type === 'sent'
+      ? { senderId: userId }
+      : type === 'all'
+      ? { OR: [{ senderId: userId }, { receiverId: userId }] }
+      : { receiverId: userId };
 
   const [messages, total] = await prisma.$transaction([
     prisma.message.findMany({

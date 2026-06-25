@@ -14,6 +14,25 @@ const parentInclude = {
   },
 };
 
+export const getMyWards = async (userId: string) => {
+  const parent = await prisma.parent.findUnique({
+    where: { userId },
+    include: {
+      wards: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          gender: true,
+          classroom: { select: { id: true, name: true } },
+        },
+      },
+    },
+  });
+  if (!parent) throw new AppError('Parent profile not found', 404);
+  return { wards: parent.wards, total: parent.wards.length };
+};
+
 export const listParents = async (query: ListQuery) => {
   const { page, limit, search, schoolId } = query;
   const skip = (page - 1) * limit;

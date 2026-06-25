@@ -8,6 +8,12 @@ const resolveSchoolId = (req: AuthRequest) =>
     ? ((req.query.schoolId as string | undefined) ?? null)
     : (req.user!.schoolId ?? null);
 
+export const getMyWards = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    success(res, await service.getMyWards(req.user!.sub));
+  } catch (err) { next(err); }
+};
+
 export const list = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { parents, total } = await service.listParents(req.query as any);
