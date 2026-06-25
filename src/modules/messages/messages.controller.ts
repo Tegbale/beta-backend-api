@@ -22,6 +22,13 @@ export const send = async (req: AuthRequest, res: Response, next: NextFunction) 
   } catch (err) { next(err); }
 };
 
+export const markConversationRead = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    await service.markConversationRead(req.user!.sub, req.body.partnerId);
+    success(res, null, 'Conversation marked as read');
+  } catch (err) { next(err); }
+};
+
 export const remove = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     await service.deleteMessage(req.user!.sub, req.params.id);

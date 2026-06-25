@@ -4,17 +4,28 @@ import { emitToUser } from '../../gateway';
 import { SocketEvents } from '../../gateway/events';
 import { CreateMessageInput, ListQuery } from './messages.schema';
 
+
 const userSelect = { select: { id: true, firstName: true, lastName: true, avatar: true } };
 
 export const listMessages = async (userId: string, query: ListQuery) => {
-  const { page, limit, type } = query;
+  const { page, limit, type, partnerId } = query;
   const skip = (page - 1) * limit;
-  const where =
+
+  let where: any =
     type === 'sent'
       ? { senderId: userId }
       : type === 'all'
       ? { OR: [{ senderId: userId }, { receiverId: userId }] }
       : { receiverId: userId };
+
+  if (partnerId) {
+    where = {
+      OR: [
+        { senderId: userId, receiverId: partnerId },
+        { senderId: partnerId, receiverId: userId },
+      ],
+    };
+  }
 
   const [messages, total] = await prisma.$transaction([
     prisma.message.findMany({
@@ -59,6 +70,14 @@ export const sendMessage = async (senderId: string, input: CreateMessageInput) =
   emitToUser(input.receiverId, SocketEvents.MESSAGE_NEW, message);
 
   return message;
+};
+
+export const markConversationRead = async (userId: string, partnerId: string) => {
+  await prisma.message.updateMany({
+    where: { senderId: partnerId, receiverId: userId, status: { not: 'READ' } },
+    data: { status: 'READ' },
+  });
+  emitToUser(partnerId, SocketEvents.MESSAGE_READ, { readBy: userId, partnerId });
 };
 
 export const deleteMessage = async (userId: string, id: string) => {
