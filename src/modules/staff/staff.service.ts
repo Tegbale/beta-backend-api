@@ -4,6 +4,8 @@ import { AppError } from '../../middleware/errorHandler';
 import { hashPassword } from '../../utils/password';
 import { generatePassword } from '../../utils/generatePassword';
 import { parseImportFile } from '../../utils/importParser';
+import { sendMail } from '../../lib/mailer';
+import { staffWelcomeEmail } from '../../lib/emailTemplates';
 import { CreateStaffInput, UpdateStaffInput, ListQuery } from './staff.schema';
 
 export const listStaff = async (schoolId: string | null | undefined, query: ListQuery) => {
@@ -48,7 +50,11 @@ export const createStaff = async (schoolId: string, input: CreateStaffInput) => 
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
   if (existing) throw new AppError('Email already in use', 409);
 
-  const tempPassword = generatePassword();
+  const [school, tempPassword] = await Promise.all([
+    prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } }),
+    Promise.resolve(generatePassword()),
+  ]);
+
   const user = await prisma.user.create({
     data: { ...input, password: await hashPassword(tempPassword), schoolId, role: input.role as Role },
     select: { id: true, email: true, firstName: true, lastName: true, role: true, schoolId: true },
@@ -58,12 +64,19 @@ export const createStaff = async (schoolId: string, input: CreateStaffInput) => 
     await prisma.teacher.create({ data: { userId: user.id, schoolId } });
   }
 
+  sendMail(
+    user.email,
+    'Your Tègbalé account is ready',
+    staffWelcomeEmail(`${user.firstName} ${user.lastName}`, school?.name ?? 'your school', user.email, tempPassword),
+  ).catch(() => {});
+
   return { user, tempPassword };
 };
 
 export const bulkCreateStaff = async (schoolId: string, role: 'TEACHER' | 'STAFF', buffer: Buffer) => {
   const rows = parseImportFile(buffer);
   const results: { created: number; failed: number; errors: { row: number; message: string }[] } = { created: 0, failed: 0, errors: [] };
+  const school = await prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } });
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
@@ -97,6 +110,11 @@ export const bulkCreateStaff = async (schoolId: string, role: 'TEACHER' | 'STAFF
       if (role === 'TEACHER') {
         await prisma.teacher.create({ data: { userId: user.id, schoolId } });
       }
+      sendMail(
+        email,
+        'Your Tègbalé account is ready',
+        staffWelcomeEmail(`${firstName} ${lastName}`, school?.name ?? 'your school', email, tempPassword),
+      ).catch(() => {});
       results.created++;
     } catch {
       results.failed++;

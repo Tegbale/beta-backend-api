@@ -51,7 +51,69 @@ export function newRequestNotificationEmail(
   `;
 }
 
-// ── Email 3: sent to school admin when account is created ──────────────────
+// ── Email 3: sent to staff / teacher when account is created ──────────────
+export function staffWelcomeEmail(
+  name: string,
+  schoolName: string,
+  loginEmail: string,
+  tempPassword: string,
+): string {
+  return `
+    <div style="font-family:sans-serif;max-width:560px;margin:auto;color:#1a1a2e">
+      <div style="background:#171D53;padding:24px 32px;border-radius:12px 12px 0 0">
+        <h1 style="color:#fff;font-size:24px;margin:0">Tègbalé</h1>
+      </div>
+      <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-radius:0 0 12px 12px">
+        <h2 style="font-size:20px;margin-top:0">Welcome to Tègbalé!</h2>
+        <p>Hi ${name},</p>
+        <p>Your Tègbalé account for <strong>${schoolName}</strong> has been created. Download the Tègbalé mobile app and log in with the credentials below.</p>
+        <div style="background:#f8f9ff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin:24px 0">
+          <p style="margin:0 0 8px;font-size:13px;color:#6b7280">Your login credentials</p>
+          <p style="margin:4px 0"><strong>Email:</strong> ${loginEmail}</p>
+          <p style="margin:4px 0"><strong>Temporary password:</strong> <span style="font-family:monospace;background:#e5e7eb;padding:2px 6px;border-radius:4px">${tempPassword}</span></p>
+        </div>
+        <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin-bottom:24px;font-size:13px">
+          ⚠️ <strong>Please change your password after your first login.</strong>
+        </div>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+        <p style="font-size:13px;color:#6b7280">Tègbalé — School Management Platform<br/>If you did not expect this email, please contact your school administrator.</p>
+      </div>
+    </div>
+  `;
+}
+
+// ── Email 4: sent to parent when account is created ────────────────────────
+export function parentWelcomeEmail(
+  name: string,
+  schoolName: string,
+  loginEmail: string,
+  tempPassword: string,
+): string {
+  return `
+    <div style="font-family:sans-serif;max-width:560px;margin:auto;color:#1a1a2e">
+      <div style="background:#171D53;padding:24px 32px;border-radius:12px 12px 0 0">
+        <h1 style="color:#fff;font-size:24px;margin:0">Tègbalé</h1>
+      </div>
+      <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-radius:0 0 12px 12px">
+        <h2 style="font-size:20px;margin-top:0">Stay connected with your child's school</h2>
+        <p>Hi ${name},</p>
+        <p><strong>${schoolName}</strong> has added you to the Tègbalé platform. Download the Tègbalé mobile app to follow your child's progress, receive updates from teachers, and stay in touch with the school.</p>
+        <div style="background:#f8f9ff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin:24px 0">
+          <p style="margin:0 0 8px;font-size:13px;color:#6b7280">Your login credentials</p>
+          <p style="margin:4px 0"><strong>Email:</strong> ${loginEmail}</p>
+          <p style="margin:4px 0"><strong>Temporary password:</strong> <span style="font-family:monospace;background:#e5e7eb;padding:2px 6px;border-radius:4px">${tempPassword}</span></p>
+        </div>
+        <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin-bottom:24px;font-size:13px">
+          ⚠️ <strong>Please change your password after your first login.</strong>
+        </div>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+        <p style="font-size:13px;color:#6b7280">Tègbalé — School Management Platform<br/>If you did not expect this email, please contact your school administrator.</p>
+      </div>
+    </div>
+  `;
+}
+
+// ── Email 5: sent to school admin when account is created ──────────────────
 export function accountCreatedEmail(
   adminName: string,
   schoolName: string,

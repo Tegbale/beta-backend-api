@@ -3,6 +3,8 @@ import { AppError } from '../../middleware/errorHandler';
 import { hashPassword } from '../../utils/password';
 import { generatePassword } from '../../utils/generatePassword';
 import { parseImportFile } from '../../utils/importParser';
+import { sendMail } from '../../lib/mailer';
+import { parentWelcomeEmail } from '../../lib/emailTemplates';
 import { CreateParentInput, UpdateParentInput, ListQuery } from './parents.schema';
 
 const parentInclude = {
@@ -82,6 +84,12 @@ export const createParent = async (input: CreateParentInput) => {
     });
     return tx.parent.create({ data: { userId: user.id }, include: parentInclude });
   });
+
+  sendMail(
+    input.email,
+    'You\'ve been added to Tègbalé',
+    parentWelcomeEmail(`${input.firstName} ${input.lastName}`, 'your school', input.email, tempPassword),
+  ).catch(() => {});
 
   return { parent, tempPassword };
 };
@@ -170,6 +178,11 @@ export const bulkCreateParents = async (buffer: Buffer) => {
         });
         await tx.parent.create({ data: { userId: user.id } });
       });
+      sendMail(
+        email,
+        'You\'ve been added to Tègbalé',
+        parentWelcomeEmail(`${firstName} ${lastName}`, 'your school', email, tempPassword),
+      ).catch(() => {});
       results.created++;
     } catch {
       results.failed++;
