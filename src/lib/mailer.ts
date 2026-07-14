@@ -13,3 +13,7 @@ const transporter = nodemailer.createTransport({
 export async function sendMail(to: string, subject: string, html: string) {
   await transporter.sendMail({ from: env.email.from, to, subject, html });
 }
+
+export async function verifySmtp(): Promise<true> {
+  return transporter.verify();
+}

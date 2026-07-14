@@ -31,4 +31,10 @@ export const env = {
     from: process.env.EMAIL_FROM ?? 'Tègbalé <noreply@tegbale.com>',
     superadminEmail: process.env.SUPERADMIN_EMAIL ?? 'superadmin@tegbale.com',
   },
+
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME ?? '',
+    apiKey: process.env.CLOUDINARY_API_KEY ?? '',
+    apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
+  },
 };

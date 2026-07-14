@@ -9,6 +9,8 @@ export const createRequestSchema = z.object({
   city: z.string().optional(),
   country: z.string().optional(),
   message: z.string().optional(),
+  cacDocumentUrl: z.string().url().optional(),
+  govtDocumentUrl: z.string().url().optional(),
 });
 
 export const listRequestsSchema = z.object({

@@ -3,12 +3,39 @@ import { hashPassword } from '../../utils/password';
 import { generatePassword } from '../../utils/generatePassword';
 import { sendMail } from '../../lib/mailer';
 import { requestReceivedEmail, newRequestNotificationEmail, accountCreatedEmail } from '../../lib/emailTemplates';
+import { uploadBuffer } from '../../lib/cloudinary';
 import { AppError } from '../../middleware/errorHandler';
 import { env } from '../../config/env';
 import { CreateRequestInput, ListRequestsQuery, RejectRequestInput } from './school-requests.schema';
 
-export const createRequest = async (input: CreateRequestInput) => {
-  const request = await prisma.schoolRequest.create({ data: input });
+export interface UploadedDocuments {
+  cacDocument?: Express.Multer.File;
+  govtDocument?: Express.Multer.File;
+}
+
+export const createRequest = async (input: CreateRequestInput, docs?: UploadedDocuments) => {
+  let cacDocumentUrl: string | undefined;
+  let govtDocumentUrl: string | undefined;
+
+  if (docs?.cacDocument) {
+    cacDocumentUrl = await uploadBuffer(
+      docs.cacDocument.buffer,
+      'tegbale/school-requests',
+      `${Date.now()}-cac`,
+    );
+  }
+
+  if (docs?.govtDocument) {
+    govtDocumentUrl = await uploadBuffer(
+      docs.govtDocument.buffer,
+      'tegbale/school-requests',
+      `${Date.now()}-govt`,
+    );
+  }
+
+  const request = await prisma.schoolRequest.create({
+    data: { ...input, cacDocumentUrl, govtDocumentUrl },
+  });
 
   const contactName = `${input.contactFirstName} ${input.contactLastName}`;
 
@@ -31,6 +58,8 @@ export const createRequest = async (input: CreateRequestInput) => {
       input.country,
       input.message,
       request.id,
+      cacDocumentUrl,
+      govtDocumentUrl,
     ),
   ).catch(() => {});
 

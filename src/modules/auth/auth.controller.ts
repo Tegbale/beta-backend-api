@@ -59,3 +59,32 @@ export const meHandler = async (req: AuthRequest, res: Response, next: NextFunct
     next(err);
   }
 };
+
+export const forgotPasswordHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    await authService.forgotPassword(req.body);
+    // Always return 200 — don't leak whether the email exists
+    success(res, null, 'If that email is registered, a reset link has been sent');
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const resetPasswordHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    await authService.resetPassword(req.body);
+    success(res, null, 'Password reset successfully');
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const verifySmtpHandler = async (_req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { verifySmtp } = await import('../../lib/mailer');
+    await verifySmtp();
+    success(res, { connected: true, host: process.env.SMTP_HOST, port: process.env.SMTP_PORT }, 'SMTP connection OK');
+  } catch (err: any) {
+    next(new AppError(`SMTP connection failed: ${err.message}`, 500));
+  }
+};

@@ -28,6 +28,8 @@ export function newRequestNotificationEmail(
   country: string | undefined,
   message: string | undefined,
   requestId: string,
+  cacDocumentUrl?: string,
+  govtDocumentUrl?: string,
 ): string {
   return `
     <div style="font-family:sans-serif;max-width:560px;margin:auto;color:#1a1a2e">
@@ -45,6 +47,12 @@ export function newRequestNotificationEmail(
           <tr><td style="padding:8px 0;color:#6b7280">Location</td><td style="padding:8px 0">${[city, country].filter(Boolean).join(', ') || '—'}</td></tr>
           ${message ? `<tr><td style="padding:8px 0;color:#6b7280;vertical-align:top">Message</td><td style="padding:8px 0">${message}</td></tr>` : ''}
         </table>
+        ${(cacDocumentUrl || govtDocumentUrl) ? `
+        <p style="margin-top:16px;font-weight:600;font-size:14px">Uploaded Documents</p>
+        <ul style="font-size:14px;padding-left:16px">
+          ${cacDocumentUrl ? `<li><a href="${cacDocumentUrl}" style="color:#408ED5">CAC Certificate</a></li>` : ''}
+          ${govtDocumentUrl ? `<li><a href="${govtDocumentUrl}" style="color:#408ED5">Government Approval Document</a></li>` : ''}
+        </ul>` : ''}
         <p style="margin-top:24px;font-size:13px;color:#6b7280">Request ID: ${requestId}<br/>Log in to the Tègbalé Super Admin portal to review and approve this request.</p>
       </div>
     </div>
@@ -113,7 +121,29 @@ export function parentWelcomeEmail(
   `;
 }
 
-// ── Email 5: sent to school admin when account is created ──────────────────
+// ── Email 5: password reset ────────────────────────────────────────────────
+export function passwordResetEmail(name: string, resetUrl: string): string {
+  return `
+    <div style="font-family:sans-serif;max-width:560px;margin:auto;color:#1a1a2e">
+      <div style="background:#171D53;padding:24px 32px;border-radius:12px 12px 0 0">
+        <h1 style="color:#fff;font-size:24px;margin:0">Tègbalé</h1>
+      </div>
+      <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-radius:0 0 12px 12px">
+        <h2 style="font-size:20px;margin-top:0">Reset your password</h2>
+        <p>Hi ${name},</p>
+        <p>We received a request to reset the password for your Tègbalé account. Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.</p>
+        <div style="text-align:center;margin:32px 0">
+          <a href="${resetUrl}" style="display:inline-block;background:#408ED5;color:#fff;padding:12px 32px;border-radius:999px;text-decoration:none;font-weight:600;font-size:14px">Reset Password</a>
+        </div>
+        <p style="font-size:13px;color:#6b7280">If you didn't request a password reset, you can safely ignore this email — your password will not change.</p>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+        <p style="font-size:13px;color:#6b7280">Tègbalé — School Management Platform</p>
+      </div>
+    </div>
+  `;
+}
+
+// ── Email 6: sent to school admin when account is created ──────────────────
 export function accountCreatedEmail(
   adminName: string,
   schoolName: string,

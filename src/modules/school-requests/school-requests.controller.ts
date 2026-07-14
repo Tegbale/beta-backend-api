@@ -3,7 +3,12 @@ import * as service from './school-requests.service';
 
 export const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const request = await service.createRequest(req.body);
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+    const docs: service.UploadedDocuments = {
+      cacDocument: files?.cacDocument?.[0],
+      govtDocument: files?.govtDocument?.[0],
+    };
+    const request = await service.createRequest(req.body, docs);
     res.status(201).json({ success: true, message: 'Request submitted successfully', data: request });
   } catch (err) {
     next(err);

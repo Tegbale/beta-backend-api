@@ -1,8 +1,12 @@
+import { randomBytes } from 'crypto';
 import { prisma } from '../../lib/prisma';
 import { hashPassword, verifyPassword } from '../../utils/password';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../../utils/jwt';
 import { AppError } from '../../middleware/errorHandler';
-import { LoginInput, RegisterInput, ChangePasswordInput } from './auth.schema';
+import { sendMail } from '../../lib/mailer';
+import { passwordResetEmail } from '../../lib/emailTemplates';
+import { env } from '../../config/env';
+import { LoginInput, RegisterInput, ChangePasswordInput, ForgotPasswordInput, ResetPasswordInput } from './auth.schema';
 
 export const register = async (input: RegisterInput) => {
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
@@ -71,6 +75,45 @@ export const changePassword = async (userId: string, input: ChangePasswordInput)
     where: { id: userId },
     data: { password: await hashPassword(input.newPassword) },
   });
+};
+
+export const forgotPassword = async (input: ForgotPasswordInput) => {
+  const user = await prisma.user.findUnique({ where: { email: input.email } });
+  // Always respond with success to avoid leaking which emails are registered
+  if (!user || !user.isActive) return;
+
+  const token = randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  await prisma.passwordResetToken.create({ data: { token, userId: user.id, expiresAt } });
+
+  const resetUrl = `${env.clientOrigins[0]}/reset-password?token=${token}`;
+  sendMail(
+    user.email,
+    'Reset your Tègbalé password',
+    passwordResetEmail(`${user.firstName} ${user.lastName}`, resetUrl),
+  ).catch(() => {});
+};
+
+export const resetPassword = async (input: ResetPasswordInput) => {
+  const record = await prisma.passwordResetToken.findUnique({ where: { token: input.token } });
+
+  if (!record || record.used || record.expiresAt < new Date()) {
+    throw new AppError('This reset link is invalid or has expired', 400);
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: record.userId },
+      data: { password: await hashPassword(input.newPassword) },
+    }),
+    prisma.passwordResetToken.update({
+      where: { id: record.id },
+      data: { used: true },
+    }),
+    // Invalidate all existing refresh tokens on password reset
+    prisma.refreshToken.deleteMany({ where: { userId: record.userId } }),
+  ]);
 };
 
 export const me = async (userId: string) => {

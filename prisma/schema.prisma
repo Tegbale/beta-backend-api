@@ -50,14 +50,15 @@ model User {
   schoolId String?
   school   School? @relation("SchoolStaff", fields: [schoolId], references: [id])
 
-  teacherProfile   Teacher?
-  parentProfile    Parent?
-  refreshTokens    RefreshToken[]
-  sentMessages     Message[]      @relation("SentMessages")
-  receivedMessages Message[]      @relation("ReceivedMessages")
-  notifications    Notification[]
-  posts            Post[]         @relation("PostAuthor")
-  comments         Comment[]      @relation("CommentAuthor")
+  teacherProfile      Teacher?
+  parentProfile       Parent?
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  sentMessages        Message[]            @relation("SentMessages")
+  receivedMessages    Message[]            @relation("ReceivedMessages")
+  notifications       Notification[]
+  posts               Post[]               @relation("PostAuthor")
+  comments            Comment[]            @relation("CommentAuthor")
 
   @@map("users")
 }
@@ -243,10 +244,25 @@ model SchoolRequest {
   city             String?
   country          String?
   message          String?
+  cacDocumentUrl   String?
+  govtDocumentUrl  String?
   status           RequestStatus @default(PENDING)
   notes            String?
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
   @@map("school_requests")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
 }
