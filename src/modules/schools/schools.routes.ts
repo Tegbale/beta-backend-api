@@ -9,7 +9,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', authorize('SUPER_ADMIN'), validate(listQuerySchema, 'query'), ctrl.list);
-router.get('/:id', authorize('SUPER_ADMIN'), ctrl.get);
+router.get('/:id', authorize('SUPER_ADMIN', 'SCHOOL_ADMIN'), ctrl.get);
 router.post('/', authorize('SUPER_ADMIN'), validate(createSchoolSchema), ctrl.create);
 router.patch('/:id', authorize('SUPER_ADMIN'), validate(updateSchoolSchema), ctrl.update);
 router.patch('/:id/toggle-status', authorize('SUPER_ADMIN'), ctrl.toggleStatus);
