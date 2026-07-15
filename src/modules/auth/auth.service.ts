@@ -124,3 +124,23 @@ export const me = async (userId: string) => {
   if (!user) throw new AppError('User not found', 404);
   return user;
 };
+
+export const updateMe = async (userId: string, data: { firstName?: string; lastName?: string; phone?: string }) => {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data,
+    select: { id: true, email: true, firstName: true, lastName: true, role: true, phone: true, avatar: true, schoolId: true, createdAt: true },
+  });
+  return user;
+};
+
+export const updateAvatar = async (userId: string, buffer: Buffer) => {
+  const { uploadBuffer } = await import('../../lib/cloudinary');
+  const url = await uploadBuffer(buffer, 'tegbale/avatars', `${userId}-${Date.now()}`);
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { avatar: url },
+    select: { id: true, email: true, firstName: true, lastName: true, role: true, phone: true, avatar: true, schoolId: true, createdAt: true },
+  });
+  return user;
+};

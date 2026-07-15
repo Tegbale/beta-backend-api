@@ -29,7 +29,7 @@ export const listStaff = async (schoolId: string | null | undefined, query: List
       skip,
       take: limit,
       orderBy: { createdAt: 'desc' },
-      select: { id: true, email: true, firstName: true, lastName: true, role: true, phone: true, avatar: true, isActive: true, createdAt: true },
+      select: { id: true, email: true, firstName: true, lastName: true, role: true, phone: true, avatar: true, isActive: true, createdAt: true, teacherProfile: { select: { id: true } } },
     }),
     prisma.user.count({ where }),
   ]);
@@ -40,7 +40,16 @@ export const listStaff = async (schoolId: string | null | undefined, query: List
 export const getStaff = async (schoolId: string, userId: string) => {
   const user = await prisma.user.findFirst({
     where: { id: userId, schoolId },
-    select: { id: true, email: true, firstName: true, lastName: true, role: true, phone: true, avatar: true, isActive: true, createdAt: true },
+    select: {
+      id: true, email: true, firstName: true, lastName: true, role: true,
+      phone: true, avatar: true, isActive: true, createdAt: true,
+      teacherProfile: {
+        select: {
+          id: true,
+          classrooms: { select: { id: true, name: true, level: true } },
+        },
+      },
+    },
   });
   if (!user) throw new AppError('Staff member not found', 404);
   return user;

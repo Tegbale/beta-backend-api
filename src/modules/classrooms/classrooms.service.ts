@@ -84,16 +84,24 @@ export const bulkCreateClassrooms = async (schoolId: string, buffer: Buffer) => 
   return results;
 };
 
-export const assignTeacher = async (classroomId: string, teacherId: string, schoolId?: string) => {
+export const assignTeacher = async (classroomId: string, userId: string, schoolId?: string) => {
   const classroom = await getClassroom(classroomId, schoolId);
-  const where: any = { id: teacherId };
-  if (schoolId) where.schoolId = schoolId;
-  const teacher = await prisma.teacher.findFirst({ where });
-  if (!teacher) throw new AppError('Teacher not found', 404);
+
+  const userWhere: any = { id: userId, role: 'TEACHER' };
+  if (schoolId) userWhere.schoolId = schoolId;
+  const user = await prisma.user.findFirst({ where: userWhere });
+  if (!user) throw new AppError('Teacher not found', 404);
+
+  // Ensure a Teacher record exists for this user (handles legacy accounts)
+  const teacher = await prisma.teacher.upsert({
+    where: { userId: user.id },
+    create: { userId: user.id, schoolId: user.schoolId! },
+    update: {},
+  });
 
   return prisma.classroom.update({
     where: { id: classroom.id },
-    data: { teachers: { connect: { id: teacherId } } },
+    data: { teachers: { connect: { id: teacher.id } } },
   });
 };
 

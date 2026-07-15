@@ -79,6 +79,26 @@ export const resetPasswordHandler = async (req: AuthRequest, res: Response, next
   }
 };
 
+export const updateMeHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { firstName, lastName, phone } = req.body;
+    const user = await authService.updateMe(req.user!.sub, { firstName, lastName, phone });
+    success(res, user, 'Profile updated');
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const uploadAvatarHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    if (!req.file) return next(new AppError('No file provided', 400));
+    const user = await authService.updateAvatar(req.user!.sub, req.file.buffer);
+    success(res, user, 'Avatar updated');
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const verifySmtpHandler = async (_req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { verifySmtp } = await import('../../lib/mailer');
