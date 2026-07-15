@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const createStudentSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
-  dateOfBirth: z.string().datetime().optional(),
+  dateOfBirth: z.string().optional(),
   gender: z.enum(['male', 'female', 'other']).optional(),
   avatar: z.string().url().optional(),
   classroomId: z.string().optional(),
