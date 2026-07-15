@@ -92,7 +92,7 @@ export const forgotPassword = async (input: ForgotPasswordInput) => {
     user.email,
     'Reset your Tègbalé password',
     passwordResetEmail(`${user.firstName} ${user.lastName}`, resetUrl),
-  ).catch(() => {});
+  ).catch((err: any) => console.error(`[mailer] ${err.message}`));
 };
 
 export const resetPassword = async (input: ResetPasswordInput) => {

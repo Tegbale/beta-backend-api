@@ -89,7 +89,7 @@ export const createParent = async (input: CreateParentInput) => {
     input.email,
     'You\'ve been added to Tègbalé',
     parentWelcomeEmail(`${input.firstName} ${input.lastName}`, 'your school', input.email, tempPassword),
-  ).catch(() => {});
+  ).catch((err: any) => console.error(`[mailer] ${err.message}`));
 
   return { parent, tempPassword };
 };
@@ -182,7 +182,7 @@ export const bulkCreateParents = async (buffer: Buffer) => {
         email,
         'You\'ve been added to Tègbalé',
         parentWelcomeEmail(`${firstName} ${lastName}`, 'your school', email, tempPassword),
-      ).catch(() => {});
+      ).catch((err: any) => console.error(`[mailer] ${err.message}`));
       results.created++;
     } catch {
       results.failed++;

@@ -77,7 +77,7 @@ export const createStaff = async (schoolId: string, input: CreateStaffInput) => 
     user.email,
     'Your Tègbalé account is ready',
     staffWelcomeEmail(`${user.firstName} ${user.lastName}`, school?.name ?? 'your school', user.email, tempPassword),
-  ).catch(() => {});
+  ).catch((err: any) => console.error(`[mailer] ${err.message}`));
 
   return { user, tempPassword };
 };
@@ -123,7 +123,7 @@ export const bulkCreateStaff = async (schoolId: string, role: 'TEACHER' | 'STAFF
         email,
         'Your Tègbalé account is ready',
         staffWelcomeEmail(`${firstName} ${lastName}`, school?.name ?? 'your school', email, tempPassword),
-      ).catch(() => {});
+      ).catch((err: any) => console.error(`[mailer] ${err.message}`));
       results.created++;
     } catch {
       results.failed++;
