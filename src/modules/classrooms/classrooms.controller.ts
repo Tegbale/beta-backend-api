@@ -54,7 +54,7 @@ export const bulkImport = async (req: AuthRequest, res: Response, next: NextFunc
 
 export const assignTeacher = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    success(res, await service.assignTeacher(req.params.id, req.body.teacherId, resolveSchoolId(req)), 'Teacher assigned');
+    success(res, await service.assignTeacher(req.params.id, req.body.userId, resolveSchoolId(req)), 'Teacher assigned');
   } catch (err) { next(err); }
 };
 

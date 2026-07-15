@@ -15,7 +15,7 @@ export const listQuerySchema = z.object({
 });
 
 export const assignTeacherSchema = z.object({
-  teacherId: z.string(),
+  userId: z.string(),
 });
 
 export type CreateClassroomInput = z.infer<typeof createClassroomSchema>;
