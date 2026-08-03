@@ -36,4 +36,14 @@ export const env = {
     apiKey: process.env.CLOUDINARY_API_KEY ?? '',
     apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
   },
+
+  storage: {
+    provider: process.env.STORAGE_PROVIDER ?? 'cloudinary',
+    spaces: {
+      key: process.env.DO_SPACES_KEY ?? '',
+      secret: process.env.DO_SPACES_SECRET ?? '',
+      bucket: process.env.DO_SPACES_BUCKET ?? '',
+      region: process.env.DO_SPACES_REGION ?? 'nyc3',
+    },
+  },
 };

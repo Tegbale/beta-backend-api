@@ -3,7 +3,7 @@ import { hashPassword } from '../../utils/password';
 import { generatePassword } from '../../utils/generatePassword';
 import { sendMail } from '../../lib/mailer';
 import { requestReceivedEmail, newRequestNotificationEmail, accountCreatedEmail } from '../../lib/emailTemplates';
-import { uploadBuffer } from '../../lib/cloudinary';
+import { uploadBuffer } from '../../lib/storage';
 import { AppError } from '../../middleware/errorHandler';
 import { env } from '../../config/env';
 import { CreateRequestInput, ListRequestsQuery, RejectRequestInput } from './school-requests.schema';
