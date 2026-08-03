@@ -23,12 +23,11 @@ export const env = {
   clientOrigins: (process.env.CLIENT_ORIGINS ?? 'http://localhost:5173').split(','),
 
   email: {
-    provider: process.env.EMAIL_PROVIDER ?? 'smtp',
-    host: process.env.SMTP_HOST ?? 'sandbox.smtp.mailtrap.io',
-    port: parseInt(process.env.SMTP_PORT ?? '587', 10),
-    username: process.env.SMTP_USERNAME ?? '',
-    password: process.env.SMTP_PASSWORD ?? '',
-    from: process.env.EMAIL_FROM ?? 'Tègbalé <noreply@tegbale.com>',
+    smtpHost: process.env.SMTP_HOST ?? 'smtp.mailgun.org',
+    smtpPort: parseInt(process.env.SMTP_PORT ?? '587', 10),
+    smtpUser: required('SMTP_USER'),
+    smtpPass: required('SMTP_PASS'),
+    from: process.env.EMAIL_FROM ?? 'noreply@tegbale.com',
     superadminEmail: process.env.SUPERADMIN_EMAIL ?? 'superadmin@tegbale.com',
   },
 
