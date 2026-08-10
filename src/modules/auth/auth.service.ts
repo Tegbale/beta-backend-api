@@ -135,7 +135,7 @@ export const updateMe = async (userId: string, data: { firstName?: string; lastN
 };
 
 export const updateAvatar = async (userId: string, buffer: Buffer) => {
-  const { uploadBuffer } = await import('../../lib/cloudinary');
+  const { uploadBuffer } = await import('../../lib/storage');
   const url = await uploadBuffer(buffer, 'tegbale/avatars', `${userId}-${Date.now()}`);
   const user = await prisma.user.update({
     where: { id: userId },

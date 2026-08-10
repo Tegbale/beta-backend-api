@@ -6,12 +6,17 @@ import { createRequestSchema, listRequestsSchema, rejectRequestSchema } from './
 import * as ctrl from './school-requests.controller';
 
 const router = Router();
+const FILE_SIZE_LIMIT = 5 * 1024 * 1024; // 5 MB
+
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB per file
+  limits: { fileSize: FILE_SIZE_LIMIT, files: 2 },
   fileFilter: (_req, file, cb) => {
     const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
-    cb(null, allowed.includes(file.mimetype));
+    if (!allowed.includes(file.mimetype)) {
+      return cb(new Error('Only PDF, JPG, and PNG files are accepted'));
+    }
+    cb(null, true);
   },
 });
 
