@@ -58,7 +58,7 @@ export const deleteClassroom = async (id: string, schoolId?: string) => {
 };
 
 export const bulkCreateClassrooms = async (schoolId: string, buffer: Buffer) => {
-  const rows = parseImportFile(buffer);
+  const rows = await parseImportFile(buffer);
   const results: { created: number; failed: number; errors: { row: number; message: string }[] } = { created: 0, failed: 0, errors: [] };
 
   for (let i = 0; i < rows.length; i++) {

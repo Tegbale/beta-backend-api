@@ -141,7 +141,7 @@ export const removeWard = async (parentId: string, studentId: string) => {
 };
 
 export const bulkCreateParents = async (buffer: Buffer) => {
-  const rows = parseImportFile(buffer);
+  const rows = await parseImportFile(buffer);
   const results: { created: number; failed: number; errors: { row: number; message: string }[] } = { created: 0, failed: 0, errors: [] };
 
   for (let i = 0; i < rows.length; i++) {
