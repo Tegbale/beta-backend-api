@@ -33,9 +33,11 @@
     "multer": "^2.2.0",
     "nodemailer": "^9.0.1",
     "socket.io": "^4.8.3",
-    "uuid": "^10.0.0",
     "winston": "^3.17.0",
     "zod": "^3.23.8"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -46,7 +48,6 @@
     "@types/multer": "^2.1.0",
     "@types/node": "^22.9.0",
     "@types/nodemailer": "^8.0.1",
-    "@types/uuid": "^10.0.0",
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
