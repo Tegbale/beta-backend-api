@@ -83,7 +83,7 @@ export const createStaff = async (schoolId: string, input: CreateStaffInput) => 
 };
 
 export const bulkCreateStaff = async (schoolId: string, role: 'TEACHER' | 'STAFF', buffer: Buffer) => {
-  const rows = parseImportFile(buffer);
+  const rows = await parseImportFile(buffer);
   const results: { created: number; failed: number; errors: { row: number; message: string }[] } = { created: 0, failed: 0, errors: [] };
   const school = await prisma.school.findUnique({ where: { id: schoolId }, select: { name: true } });
 
