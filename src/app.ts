@@ -22,6 +22,7 @@ import schoolRequestsRoutes from './modules/school-requests/school-requests.rout
 
 const app = express();
 
+app.set('trust proxy', 1); // Render sits behind a reverse proxy
 app.use(helmet());
 app.use(cors({ origin: env.clientOrigins, credentials: true }));
 app.use(express.json());
