@@ -29,24 +29,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan(env.isDev ? 'dev' : 'combined'));
 
 app.use(
-  '/api',
+  '/api/v1',
   rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false })
 );
 
 app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-app.use('/api/auth', authRoutes);
-app.use('/api/schools', schoolsRoutes);
-app.use('/api/staff', staffRoutes);
-app.use('/api/classrooms', classroomsRoutes);
-app.use('/api/students', studentsRoutes);
-app.use('/api/events', eventsRoutes);
-app.use('/api/messages', messagesRoutes);
-app.use('/api/notifications', notificationsRoutes);
-app.use('/api/parents', parentsRoutes);
-app.use('/api/posts', postsRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/school-requests', schoolRequestsRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/schools', schoolsRoutes);
+app.use('/api/v1/staff', staffRoutes);
+app.use('/api/v1/classrooms', classroomsRoutes);
+app.use('/api/v1/students', studentsRoutes);
+app.use('/api/v1/events', eventsRoutes);
+app.use('/api/v1/messages', messagesRoutes);
+app.use('/api/v1/notifications', notificationsRoutes);
+app.use('/api/v1/parents', parentsRoutes);
+app.use('/api/v1/posts', postsRoutes);
+app.use('/api/v1/users', usersRoutes);
+app.use('/api/v1/school-requests', schoolRequestsRoutes);
 
 app.use(errorHandler);
 
