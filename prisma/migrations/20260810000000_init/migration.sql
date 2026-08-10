@@ -1,0 +1,3 @@
+-- Baseline migration: represents the schema state before migrations were introduced.
+-- Mark this as applied on existing databases without running it:
+--   npx prisma migrate resolve --applied 20260810000000_init
