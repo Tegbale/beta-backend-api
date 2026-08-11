@@ -5,11 +5,14 @@ function createTransport() {
   return nodemailer.createTransport({
     host: env.email.smtpHost,
     port: env.email.smtpPort,
-    secure: false,
+    secure: env.email.smtpSecure,
     auth: {
       user: env.email.smtpUser,
       pass: env.email.smtpPass,
     },
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 10_000,
   });
 }
 

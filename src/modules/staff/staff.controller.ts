@@ -17,25 +17,28 @@ export const list = async (req: AuthRequest, res: Response, next: NextFunction) 
 
 export const get = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    success(res, await staffService.getStaff(req.user!.schoolId!, req.params.id));
+    success(res, await staffService.getStaff(resolveSchoolId(req), req.params.id));
   } catch (err) { next(err); }
 };
 
 export const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    created(res, await staffService.createStaff(req.user!.schoolId!, req.body), 'Staff member created');
+    const schoolId = req.user!.role === 'SUPER_ADMIN'
+      ? (req.body.schoolId as string | undefined) ?? null
+      : req.user!.schoolId!;
+    created(res, await staffService.createStaff(schoolId, req.body), 'Staff member created');
   } catch (err) { next(err); }
 };
 
 export const update = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    success(res, await staffService.updateStaff(req.user!.schoolId!, req.params.id, req.body), 'Staff member updated');
+    success(res, await staffService.updateStaff(resolveSchoolId(req), req.params.id, req.body), 'Staff member updated');
   } catch (err) { next(err); }
 };
 
 export const toggleStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    success(res, await staffService.toggleStaffStatus(req.user!.schoolId!, req.params.id), 'Status updated');
+    success(res, await staffService.toggleStaffStatus(resolveSchoolId(req), req.params.id), 'Status updated');
   } catch (err) { next(err); }
 };
 

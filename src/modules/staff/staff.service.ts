@@ -37,9 +37,10 @@ export const listStaff = async (schoolId: string | null | undefined, query: List
   return { staff, total };
 };
 
-export const getStaff = async (schoolId: string, userId: string) => {
+export const getStaff = async (schoolId: string | null | undefined, userId: string) => {
+  const where = schoolId ? { id: userId, schoolId } : { id: userId };
   const user = await prisma.user.findFirst({
-    where: { id: userId, schoolId },
+    where,
     select: {
       id: true, email: true, firstName: true, lastName: true, role: true,
       phone: true, avatar: true, isActive: true, createdAt: true,
@@ -55,7 +56,8 @@ export const getStaff = async (schoolId: string, userId: string) => {
   return user;
 };
 
-export const createStaff = async (schoolId: string, input: CreateStaffInput) => {
+export const createStaff = async (schoolId: string | null | undefined, input: CreateStaffInput) => {
+  if (!schoolId) throw new AppError('schoolId is required', 400);
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
   if (existing) throw new AppError('Email already in use', 409);
 
@@ -134,7 +136,7 @@ export const bulkCreateStaff = async (schoolId: string, role: 'TEACHER' | 'STAFF
   return results;
 };
 
-export const updateStaff = async (schoolId: string, userId: string, input: UpdateStaffInput) => {
+export const updateStaff = async (schoolId: string | null | undefined, userId: string, input: UpdateStaffInput) => {
   await getStaff(schoolId, userId);
   return prisma.user.update({
     where: { id: userId },
@@ -143,7 +145,7 @@ export const updateStaff = async (schoolId: string, userId: string, input: Updat
   });
 };
 
-export const toggleStaffStatus = async (schoolId: string, userId: string) => {
+export const toggleStaffStatus = async (schoolId: string | null | undefined, userId: string) => {
   const user = await getStaff(schoolId, userId);
   return prisma.user.update({ where: { id: userId }, data: { isActive: !user.isActive } });
 };
