@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../types';
 import * as staffService from './staff.service';
+import { AppError } from '../../middleware/errorHandler';
 import { success, created, paginated } from '../../utils/response';
 
 const resolveSchoolId = (req: AuthRequest) =>
@@ -52,7 +53,7 @@ export const remove = async (req: AuthRequest, res: Response, next: NextFunction
 
 export const bulkImport = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    if (!req.file) return next(new Error('No file uploaded'));
+    if (!req.file) return next(new AppError('No file uploaded', 400));
     const role = (req.query.role as 'TEACHER' | 'STAFF') === 'TEACHER' ? 'TEACHER' : 'STAFF';
     success(res, await staffService.bulkCreateStaff(req.user!.schoolId!, role, req.file.buffer), 'Import complete');
   } catch (err) { next(err); }
