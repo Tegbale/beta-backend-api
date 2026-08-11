@@ -3,10 +3,11 @@ import { prisma } from '../../lib/prisma';
 import { AppError } from '../../middleware/errorHandler';
 import { CreateEventInput, UpdateEventInput, ListQuery } from './events.schema';
 
-export const listEvents = async (schoolId: string, query: ListQuery) => {
+export const listEvents = async (schoolId: string | null | undefined, query: ListQuery) => {
   const { page, limit, status, search } = query;
   const skip = (page - 1) * limit;
-  const where: any = { schoolId };
+  const where: any = {};
+  if (schoolId) where.schoolId = schoolId;
   if (status) where.status = status as EventStatus;
   if (search) where.title = { contains: search, mode: 'insensitive' };
 
@@ -18,8 +19,9 @@ export const listEvents = async (schoolId: string, query: ListQuery) => {
   return { events, total };
 };
 
-export const getEvent = async (schoolId: string, id: string) => {
-  const event = await prisma.event.findFirst({ where: { id, schoolId } });
+export const getEvent = async (schoolId: string | null | undefined, id: string) => {
+  const where = schoolId ? { id, schoolId } : { id };
+  const event = await prisma.event.findFirst({ where });
   if (!event) throw new AppError('Event not found', 404);
   return event;
 };

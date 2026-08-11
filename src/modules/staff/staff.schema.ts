@@ -6,6 +6,7 @@ export const createStaffSchema = z.object({
   lastName: z.string().min(1, 'Last name is required').max(100),
   phone: z.string().optional(),
   role: z.enum(['SCHOOL_ADMIN', 'STAFF', 'TEACHER']),
+  schoolId: z.string().optional(),
 });
 
 export const updateStaffSchema = z.object({
