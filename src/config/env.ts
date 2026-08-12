@@ -20,7 +20,11 @@ export const env = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
   },
 
-  clientOrigins: (process.env.CLIENT_ORIGINS ?? 'http://localhost:5173').split(','),
+  clientOrigins: (process.env.CLIENT_ORIGINS ?? 'http://localhost:5173')
+    .split(',')
+    .map((o) => o.trim().replace(/\/$/, '')),
+
+  frontendUrl: (process.env.FRONTEND_URL ?? 'http://localhost:5173').replace(/\/$/, ''),
 
   email: {
     smtpHost: process.env.SMTP_HOST ?? 'smtp.mailgun.org',
