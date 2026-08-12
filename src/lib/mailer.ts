@@ -2,7 +2,7 @@ import { env } from '../config/env';
 
 export async function sendMail(to: string, subject: string, html: string) {
   const form = new FormData();
-  form.append('from', `Tegbale <${env.mailgun.from}>`);
+  form.append('from', env.mailgun.from);
   form.append('to', to);
   form.append('subject', subject);
   form.append('html', html);

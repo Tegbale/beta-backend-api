@@ -29,7 +29,7 @@ export const env = {
   mailgun: {
     apiKey: required('MAILGUN_API_KEY'),
     domain: process.env.MAILGUN_DOMAIN ?? 'sandboxb467d7cf770b44a0abb361ab3609a414.mailgun.org',
-    from: process.env.EMAIL_FROM ?? 'noreply@tegbale.com',
+    from: process.env.EMAIL_FROM ?? `Tegbale <mailgun@${process.env.MAILGUN_DOMAIN ?? 'sandboxb467d7cf770b44a0abb361ab3609a414.mailgun.org'}>`,
     superadminEmail: process.env.SUPERADMIN_EMAIL ?? 'superadmin@tegbale.com',
   },
 
