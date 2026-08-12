@@ -47,7 +47,7 @@ export const createRequest = async (input: CreateRequestInput, docs?: UploadedDo
   ).catch(() => {});
 
   sendMail(
-    env.email.superadminEmail,
+    env.mailgun.superadminEmail,
     `New school request: ${input.schoolName}`,
     newRequestNotificationEmail(
       input.schoolName,

@@ -101,10 +101,14 @@ export const uploadAvatarHandler = async (req: AuthRequest, res: Response, next:
 
 export const verifySmtpHandler = async (_req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { verifySmtp } = await import('../../lib/mailer');
-    await verifySmtp();
-    success(res, { connected: true, host: process.env.SMTP_HOST, port: process.env.SMTP_PORT }, 'SMTP connection OK');
+    const { env } = await import('../../config/env');
+    const credentials = Buffer.from(`api:${env.mailgun.apiKey}`).toString('base64');
+    const res2 = await fetch(`https://api.mailgun.net/v3/domains/${env.mailgun.domain}`, {
+      headers: { Authorization: `Basic ${credentials}` },
+    });
+    if (!res2.ok) throw new Error(`Mailgun API returned ${res2.status}`);
+    success(res, { connected: true, domain: env.mailgun.domain }, 'Mailgun connection OK');
   } catch (err: any) {
-    next(new AppError(`SMTP connection failed: ${err.message}`, 500));
+    next(new AppError(`Mailgun connection failed: ${err.message}`, 500));
   }
 };

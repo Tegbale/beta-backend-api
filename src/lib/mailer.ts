@@ -1,31 +1,25 @@
-import nodemailer from 'nodemailer';
 import { env } from '../config/env';
 
-function createTransport() {
-  return nodemailer.createTransport({
-    host: env.email.smtpHost,
-    port: env.email.smtpPort,
-    secure: env.email.smtpSecure,
-    auth: {
-      user: env.email.smtpUser,
-      pass: env.email.smtpPass,
-    },
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 10_000,
-  });
-}
-
 export async function sendMail(to: string, subject: string, html: string) {
-  await createTransport().sendMail({
-    from: `Tègbalé <${env.email.from}>`,
-    to,
-    subject,
-    html,
-  });
-}
+  const form = new FormData();
+  form.append('from', `Tègbalé <${env.mailgun.from}>`);
+  form.append('to', to);
+  form.append('subject', subject);
+  form.append('html', html);
 
-export async function verifySmtp(): Promise<true> {
-  await createTransport().verify();
-  return true;
+  const credentials = Buffer.from(`api:${env.mailgun.apiKey}`).toString('base64');
+
+  const res = await fetch(
+    `https://api.mailgun.net/v3/${env.mailgun.domain}/messages`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Basic ${credentials}` },
+      body: form,
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Mailgun ${res.status}: ${text}`);
+  }
 }

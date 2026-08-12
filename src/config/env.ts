@@ -26,12 +26,9 @@ export const env = {
 
   frontendUrl: (process.env.FRONTEND_URL ?? 'http://localhost:5173').replace(/\/$/, ''),
 
-  email: {
-    smtpHost: process.env.SMTP_HOST ?? 'smtp.mailgun.org',
-    smtpPort: parseInt(process.env.SMTP_PORT ?? '465', 10),
-    smtpSecure: process.env.SMTP_SECURE !== 'false',
-    smtpUser: required('SMTP_USER'),
-    smtpPass: required('SMTP_PASS'),
+  mailgun: {
+    apiKey: required('MAILGUN_API_KEY'),
+    domain: process.env.MAILGUN_DOMAIN ?? 'sandboxb467d7cf770b44a0abb361ab3609a414.mailgun.org',
     from: process.env.EMAIL_FROM ?? 'noreply@tegbale.com',
     superadminEmail: process.env.SUPERADMIN_EMAIL ?? 'superadmin@tegbale.com',
   },
