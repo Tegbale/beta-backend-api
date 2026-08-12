@@ -28,7 +28,8 @@ export const env = {
 
   email: {
     smtpHost: process.env.SMTP_HOST ?? 'smtp.mailgun.org',
-    smtpPort: parseInt(process.env.SMTP_PORT ?? '587', 10),
+    smtpPort: parseInt(process.env.SMTP_PORT ?? '465', 10),
+    smtpSecure: process.env.SMTP_SECURE !== 'false',
     smtpUser: required('SMTP_USER'),
     smtpPass: required('SMTP_PASS'),
     from: process.env.EMAIL_FROM ?? 'noreply@tegbale.com',
