@@ -87,7 +87,7 @@ export const forgotPassword = async (input: ForgotPasswordInput) => {
 
   await prisma.passwordResetToken.create({ data: { token, userId: user.id, expiresAt } });
 
-  const resetUrl = `${env.clientOrigins[0]}/reset-password?token=${token}`;
+  const resetUrl = `${env.frontendUrl}/reset-password?token=${token}`;
   sendMail(
     user.email,
     'Reset your Tègbalé password',
