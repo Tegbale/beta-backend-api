@@ -339,6 +339,24 @@
         },
         {
           "name": "Create Staff Member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "pm.test('Response has user with jobTitle', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data).to.have.property('user');",
+                  "  pm.expect(json.data).to.have.property('tempPassword');",
+                  "  pm.expect(json.data.user).to.have.property('jobTitle');",
+                  "  pm.collectionVariables.set('staffId', json.data.user.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -353,10 +371,25 @@
         },
         {
           "name": "Update Staff Member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('jobTitle updated', function () {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.data).to.have.property('jobTitle');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PATCH",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/staff/:id", "host": ["{{baseUrl}}"], "path": ["api","staff",":id"], "variable": [{ "key": "id", "value": "" }] },
+            "url": { "raw": "{{baseUrl}}/api/staff/{{staffId}}", "host": ["{{baseUrl}}"], "path": ["api","staff","{{staffId}}"] },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"firstName\": \"Chidi\",\n  \"lastName\": \"Nwosu\",\n  \"phone\": \"+2348099887766\",\n  \"jobTitle\": \"School Nurse\"\n}",
@@ -366,16 +399,38 @@
         },
         {
           "name": "Toggle Staff Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/api/staff/:id/toggle-status", "host": ["{{baseUrl}}"], "path": ["api","staff",":id","toggle-status"], "variable": [{ "key": "id", "value": "" }] }
+            "url": { "raw": "{{baseUrl}}/api/staff/{{staffId}}/toggle-status", "host": ["{{baseUrl}}"], "path": ["api","staff","{{staffId}}","toggle-status"] }
           }
         },
         {
           "name": "Delete Staff Member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/staff/:id", "host": ["{{baseUrl}}"], "path": ["api","staff",":id"], "variable": [{ "key": "id", "value": "" }] }
+            "url": { "raw": "{{baseUrl}}/api/staff/{{staffId}}", "host": ["{{baseUrl}}"], "path": ["api","staff","{{staffId}}"] }
           }
         },
         {
