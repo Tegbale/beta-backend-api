@@ -121,7 +121,7 @@ export const approveRequest = async (id: string) => {
   });
 
   // Send credential email to the new school admin
-  const loginUrl = `${env.frontendUrl}/login`;
+  const loginUrl = (env.clientOrigins[0] ?? 'http://localhost:5174') + '/login';
   sendMail(
     admin.email,
     'Your Tègbalé school account is ready',
