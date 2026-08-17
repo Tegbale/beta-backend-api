@@ -23,7 +23,10 @@ export const get = async (req: AuthRequest, res: Response, next: NextFunction) =
 
 export const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    created(res, await staffService.createStaff(req.user!.schoolId!, req.body), 'Staff member created');
+    const schoolId = req.user!.role === 'SUPER_ADMIN'
+      ? (req.body.schoolId ?? resolveSchoolId(req))
+      : req.user!.schoolId!;
+    created(res, await staffService.createStaff(schoolId, req.body, req.user!.role), 'Staff member created');
   } catch (err) { next(err); }
 };
 

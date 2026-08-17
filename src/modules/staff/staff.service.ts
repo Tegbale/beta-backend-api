@@ -6,6 +6,7 @@ import { generatePassword } from '../../utils/generatePassword';
 import { parseImportFile } from '../../utils/importParser';
 import { sendMail } from '../../lib/mailer';
 import { staffWelcomeEmail } from '../../lib/emailTemplates';
+import { env } from '../../config/env';
 import { CreateStaffInput, UpdateStaffInput, ListQuery } from './staff.schema';
 
 export const listStaff = async (schoolId: string | null | undefined, query: ListQuery) => {
@@ -55,7 +56,11 @@ export const getStaff = async (schoolId: string, userId: string) => {
   return user;
 };
 
-export const createStaff = async (schoolId: string, input: CreateStaffInput) => {
+export const createStaff = async (schoolId: string, input: CreateStaffInput, callerRole: string) => {
+  if (callerRole === 'SCHOOL_ADMIN' && input.role === 'SCHOOL_ADMIN') {
+    throw new AppError('School admins cannot create other school admin accounts', 403);
+  }
+
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
   if (existing) throw new AppError('Email already in use', 409);
 
@@ -73,10 +78,13 @@ export const createStaff = async (schoolId: string, input: CreateStaffInput) => 
     await prisma.teacher.create({ data: { userId: user.id, schoolId } });
   }
 
+  // STAFF role users log in via the web portal; TEACHER/other roles use the mobile app
+  const loginUrl = input.role === 'STAFF' ? `${env.frontendUrl}/login` : undefined;
+
   sendMail(
     user.email,
     'Your Tègbalé account is ready',
-    staffWelcomeEmail(`${user.firstName} ${user.lastName}`, school?.name ?? 'your school', user.email, tempPassword),
+    staffWelcomeEmail(`${user.firstName} ${user.lastName}`, school?.name ?? 'your school', user.email, tempPassword, loginUrl),
   ).catch((err: any) => console.error(`[mailer] ${err.message}`));
 
   return { user, tempPassword };
