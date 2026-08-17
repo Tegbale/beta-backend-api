@@ -28,7 +28,7 @@ export const create = async (req: AuthRequest, res: Response, next: NextFunction
     const schoolId = req.user!.role === 'SUPER_ADMIN'
       ? (bodySchoolId as string | undefined) ?? null
       : req.user!.schoolId!;
-    created(res, await staffService.createStaff(schoolId, input), 'Staff member created');
+    created(res, await staffService.createStaff(schoolId, input, req.user!.role), 'Staff member created');
   } catch (err) { next(err); }
 };
 

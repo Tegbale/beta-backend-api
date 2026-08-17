@@ -65,7 +65,13 @@ export function staffWelcomeEmail(
   schoolName: string,
   loginEmail: string,
   tempPassword: string,
+  loginUrl?: string,
 ): string {
+  const accessNote = loginUrl
+    ? `<p>Your Tègbalé staff account for <strong>${schoolName}</strong> has been created. Log in to the school admin portal with the credentials below.</p>
+       <a href="${loginUrl}" style="display:inline-block;background:#408ED5;color:#fff;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:600;font-size:14px;margin-bottom:24px">Log in to Tègbalé</a>`
+    : `<p>Your Tègbalé account for <strong>${schoolName}</strong> has been created. Download the Tègbalé mobile app and log in with the credentials below.</p>`;
+
   return `
     <div style="font-family:sans-serif;max-width:560px;margin:auto;color:#1a1a2e">
       <div style="background:#171D53;padding:24px 32px;border-radius:12px 12px 0 0">
@@ -74,7 +80,7 @@ export function staffWelcomeEmail(
       <div style="background:#fff;padding:32px;border:1px solid #e5e7eb;border-radius:0 0 12px 12px">
         <h2 style="font-size:20px;margin-top:0">Welcome to Tègbalé!</h2>
         <p>Hi ${name},</p>
-        <p>Your Tègbalé account for <strong>${schoolName}</strong> has been created. Download the Tègbalé mobile app and log in with the credentials below.</p>
+        ${accessNote}
         <div style="background:#f8f9ff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin:24px 0">
           <p style="margin:0 0 8px;font-size:13px;color:#6b7280">Your login credentials</p>
           <p style="margin:4px 0"><strong>Email:</strong> ${loginEmail}</p>
