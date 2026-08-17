@@ -345,10 +345,10 @@
             "url": { "raw": "{{baseUrl}}/api/staff", "host": ["{{baseUrl}}"], "path": ["api","staff"] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"teacher@school.com\",\n  \"firstName\": \"Chidi\",\n  \"lastName\": \"Okeke\",\n  \"phone\": \"+2348011223344\",\n  \"role\": \"TEACHER\"\n}",
+              "raw": "{\n  \"email\": \"staff@school.com\",\n  \"firstName\": \"Chidi\",\n  \"lastName\": \"Okeke\",\n  \"phone\": \"+2348011223344\",\n  \"role\": \"STAFF\",\n  \"jobTitle\": \"Head Teacher\"\n}",
               "options": { "raw": { "language": "json" } }
             },
-            "description": "Creates the staff account and emails temporary credentials. `role`: SCHOOL_ADMIN | STAFF | TEACHER."
+            "description": "Creates the staff account and emails temporary credentials. `role`: SCHOOL_ADMIN | STAFF | TEACHER. `jobTitle` (optional): free-form label e.g. 'Counsellor', 'Head Teacher', 'School Nurse'. SCHOOL_ADMIN callers cannot set role=SCHOOL_ADMIN (returns 403)."
           }
         },
         {
@@ -359,7 +359,7 @@
             "url": { "raw": "{{baseUrl}}/api/staff/:id", "host": ["{{baseUrl}}"], "path": ["api","staff",":id"], "variable": [{ "key": "id", "value": "" }] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Chidi\",\n  \"lastName\": \"Nwosu\",\n  \"phone\": \"+2348099887766\"\n}",
+              "raw": "{\n  \"firstName\": \"Chidi\",\n  \"lastName\": \"Nwosu\",\n  \"phone\": \"+2348099887766\",\n  \"jobTitle\": \"School Nurse\"\n}",
               "options": { "raw": { "language": "json" } }
             }
           }

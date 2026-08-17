@@ -30,7 +30,7 @@ export const listStaff = async (schoolId: string | null | undefined, query: List
       skip,
       take: limit,
       orderBy: { createdAt: 'desc' },
-      select: { id: true, email: true, firstName: true, lastName: true, role: true, phone: true, avatar: true, isActive: true, createdAt: true, teacherProfile: { select: { id: true } } },
+      select: { id: true, email: true, firstName: true, lastName: true, role: true, jobTitle: true, phone: true, avatar: true, isActive: true, createdAt: true, teacherProfile: { select: { id: true } } },
     }),
     prisma.user.count({ where }),
   ]);
@@ -43,7 +43,7 @@ export const getStaff = async (schoolId: string, userId: string) => {
     where: { id: userId, schoolId },
     select: {
       id: true, email: true, firstName: true, lastName: true, role: true,
-      phone: true, avatar: true, isActive: true, createdAt: true,
+      jobTitle: true, phone: true, avatar: true, isActive: true, createdAt: true,
       teacherProfile: {
         select: {
           id: true,
@@ -71,7 +71,7 @@ export const createStaff = async (schoolId: string, input: CreateStaffInput, cal
 
   const user = await prisma.user.create({
     data: { ...input, password: await hashPassword(tempPassword), schoolId, role: input.role as Role },
-    select: { id: true, email: true, firstName: true, lastName: true, role: true, schoolId: true },
+    select: { id: true, email: true, firstName: true, lastName: true, role: true, jobTitle: true, schoolId: true },
   });
 
   if (input.role === 'TEACHER') {
@@ -147,7 +147,7 @@ export const updateStaff = async (schoolId: string, userId: string, input: Updat
   return prisma.user.update({
     where: { id: userId },
     data: input,
-    select: { id: true, email: true, firstName: true, lastName: true, role: true, phone: true, avatar: true },
+    select: { id: true, email: true, firstName: true, lastName: true, role: true, jobTitle: true, phone: true, avatar: true },
   });
 };
 
