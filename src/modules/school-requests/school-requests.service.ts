@@ -1,3 +1,4 @@
+import path from 'path';
 import { prisma } from '../../lib/prisma';
 import { hashPassword } from '../../utils/password';
 import { generatePassword } from '../../utils/generatePassword';
@@ -19,19 +20,21 @@ export const createRequest = async (input: CreateRequestInput, docs?: UploadedDo
   let govtDocumentUrl: string | undefined;
 
   if (docs?.cacDocument) {
+    const ext = path.extname(docs.cacDocument.originalname).toLowerCase() || '.pdf';
     cacDocumentUrl = await uploadBuffer(
       docs.cacDocument.buffer,
       'tegbale/school-requests',
-      `${Date.now()}-cac`,
+      `${Date.now()}-cac${ext}`,
       'raw',
     );
   }
 
   if (docs?.govtDocument) {
+    const ext = path.extname(docs.govtDocument.originalname).toLowerCase() || '.pdf';
     govtDocumentUrl = await uploadBuffer(
       docs.govtDocument.buffer,
       'tegbale/school-requests',
-      `${Date.now()}-govt`,
+      `${Date.now()}-govt${ext}`,
       'raw',
     );
   }
