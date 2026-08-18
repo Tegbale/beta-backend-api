@@ -12,6 +12,13 @@ export const list = async (req: AuthRequest, res: Response, next: NextFunction) 
   } catch (err) { next(err); }
 };
 
+export const getCount = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const count = await service.getUnreadCount(req.user!.sub);
+    success(res, { count });
+  } catch (err) { next(err); }
+};
+
 export const markRead = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     success(res, await service.markAsRead(req.user!.sub, req.params.id), 'Marked as read');

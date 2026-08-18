@@ -28,6 +28,10 @@ export const markAllAsRead = async (userId: string) => {
   emitToUser(userId, SocketEvents.NOTIFICATION_COUNT, { count: 0 });
 };
 
+export const getUnreadCount = async (userId: string) => {
+  return prisma.notification.count({ where: { userId, isRead: false } });
+};
+
 export const createNotification = async (
   userId: string,
   title: string,
