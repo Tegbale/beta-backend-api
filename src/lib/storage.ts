@@ -1,12 +1,22 @@
 import { env } from '../config/env';
 
-export async function uploadBuffer(buffer: Buffer, folder: string, filename: string): Promise<string> {
+export async function uploadBuffer(
+  buffer: Buffer,
+  folder: string,
+  filename: string,
+  resourceType: 'auto' | 'image' | 'raw' = 'auto',
+): Promise<string> {
   return env.storage.provider === 'spaces'
     ? uploadToSpaces(buffer, folder, filename)
-    : uploadToCloudinary(buffer, folder, filename);
+    : uploadToCloudinary(buffer, folder, filename, resourceType);
 }
 
-async function uploadToCloudinary(buffer: Buffer, folder: string, filename: string): Promise<string> {
+async function uploadToCloudinary(
+  buffer: Buffer,
+  folder: string,
+  filename: string,
+  resourceType: 'auto' | 'image' | 'raw',
+): Promise<string> {
   const { v2: cloudinary } = await import('cloudinary');
   cloudinary.config({
     cloud_name: env.cloudinary.cloudName,
@@ -15,7 +25,7 @@ async function uploadToCloudinary(buffer: Buffer, folder: string, filename: stri
   });
   return new Promise((resolve, reject) => {
     cloudinary.uploader.upload_stream(
-      { folder, public_id: filename, resource_type: 'auto' },
+      { folder, public_id: filename, resource_type: resourceType },
       (error, result) => {
         if (error || !result) return reject(error ?? new Error('Upload failed'));
         resolve(result.secure_url);

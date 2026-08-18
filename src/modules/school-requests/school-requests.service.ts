@@ -23,6 +23,7 @@ export const createRequest = async (input: CreateRequestInput, docs?: UploadedDo
       docs.cacDocument.buffer,
       'tegbale/school-requests',
       `${Date.now()}-cac`,
+      'raw',
     );
   }
 
@@ -31,6 +32,7 @@ export const createRequest = async (input: CreateRequestInput, docs?: UploadedDo
       docs.govtDocument.buffer,
       'tegbale/school-requests',
       `${Date.now()}-govt`,
+      'raw',
     );
   }
 
