@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as service from './school-requests.service';
 import { generateCloudinaryDownloadUrl } from '../../lib/storage';
 import { AppError } from '../../middleware/errorHandler';
+import { env } from '../../config/env';
 
 function proxyUrl(req: Request, requestId: string, type: 'cac' | 'govt'): string {
   const proto = (req.headers['x-forwarded-proto'] as string | undefined)?.split(',')[0].trim() ?? req.protocol;
@@ -10,6 +11,11 @@ function proxyUrl(req: Request, requestId: string, type: 'cac' | 'govt'): string
 }
 
 function withProxyDocUrls(req: Request, request: any) {
+  // On Spaces (public-read ACL), documents are directly accessible — no proxy needed.
+  // Only proxy through the backend when using Cloudinary (CDN access is restricted at account level).
+  if (env.storage.provider !== 'cloudinary') {
+    return request;
+  }
   return {
     ...request,
     cacDocumentUrl: request.cacDocumentUrl ? proxyUrl(req, request.id, 'cac') : null,
