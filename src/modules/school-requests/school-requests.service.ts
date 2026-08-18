@@ -7,6 +7,7 @@ import { uploadBuffer } from '../../lib/storage';
 import { AppError } from '../../middleware/errorHandler';
 import { env } from '../../config/env';
 import { CreateRequestInput, ListRequestsQuery, RejectRequestInput } from './school-requests.schema';
+import { createNotification } from '../notifications/notifications.service';
 
 export interface UploadedDocuments {
   cacDocument?: Express.Multer.File;
@@ -132,6 +133,13 @@ export const approveRequest = async (id: string) => {
       tempPassword,
       loginUrl,
     ),
+  ).catch(() => {});
+
+  createNotification(
+    admin.id,
+    'School approved',
+    `Your school "${school.name}" is now active on Tègbalé.`,
+    'school_approved',
   ).catch(() => {});
 
   return { school, admin: { id: admin.id, email: admin.email, firstName: admin.firstName, lastName: admin.lastName } };

@@ -2,6 +2,7 @@ import { EventStatus } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import { AppError } from '../../middleware/errorHandler';
 import { CreateEventInput, UpdateEventInput, ListQuery } from './events.schema';
+import { notifySchool } from '../notifications/notifications.service';
 
 export const listEvents = async (schoolId: string | null | undefined, query: ListQuery) => {
   const { page, limit, status, search } = query;
@@ -26,8 +27,8 @@ export const getEvent = async (schoolId: string | null | undefined, id: string) 
   return event;
 };
 
-export const createEvent = async (schoolId: string, input: CreateEventInput) => {
-  return prisma.event.create({
+export const createEvent = async (schoolId: string, creatorId: string, input: CreateEventInput) => {
+  const event = await prisma.event.create({
     data: {
       ...input,
       schoolId,
@@ -35,6 +36,16 @@ export const createEvent = async (schoolId: string, input: CreateEventInput) => 
       endDate: input.endDate ? new Date(input.endDate) : undefined,
     },
   });
+
+  notifySchool(
+    schoolId,
+    creatorId,
+    `New event: ${event.title}`,
+    event.description ? event.description.slice(0, 120) : `A new event has been scheduled.`,
+    'event_new',
+  ).catch(() => {});
+
+  return event;
 };
 
 export const updateEvent = async (schoolId: string, id: string, input: UpdateEventInput) => {

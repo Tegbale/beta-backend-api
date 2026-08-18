@@ -23,7 +23,7 @@ export const get = async (req: AuthRequest, res: Response, next: NextFunction) =
 
 export const create = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    created(res, await service.createEvent(req.user!.schoolId!, req.body), 'Event created');
+    created(res, await service.createEvent(req.user!.schoolId!, req.user!.sub, req.body), 'Event created');
   } catch (err) { next(err); }
 };
 

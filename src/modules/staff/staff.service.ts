@@ -8,6 +8,7 @@ import { sendMail } from '../../lib/mailer';
 import { staffWelcomeEmail } from '../../lib/emailTemplates';
 import { env } from '../../config/env';
 import { CreateStaffInput, UpdateStaffInput, ListQuery } from './staff.schema';
+import { createNotification } from '../notifications/notifications.service';
 
 export const listStaff = async (schoolId: string | null | undefined, query: ListQuery) => {
   const { page, limit, search, role } = query;
@@ -89,6 +90,13 @@ export const createStaff = async (schoolId: string | null | undefined, input: Cr
     'Your Tègbalé account is ready',
     staffWelcomeEmail(`${user.firstName} ${user.lastName}`, school?.name ?? 'your school', user.email, tempPassword, loginUrl),
   ).catch((err: any) => console.error(`[mailer] ${err.message}`));
+
+  createNotification(
+    user.id,
+    'Welcome to Tègbalé',
+    `Your account has been created at ${school?.name ?? 'your school'}. Check your email for login details.`,
+    'account_created',
+  ).catch(() => {});
 
   return { user, tempPassword };
 };

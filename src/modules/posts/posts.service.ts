@@ -1,6 +1,7 @@
 import { prisma } from '../../lib/prisma';
 import { AppError } from '../../middleware/errorHandler';
 import { CreatePostInput, ListQuery, CreateCommentInput } from './posts.schema';
+import { createNotification, notifySchool } from '../notifications/notifications.service';
 
 const authorSelect = {
   id: true,
@@ -61,11 +62,7 @@ async function notifyMentions(content: string, schoolId: string, authorId: strin
     if (last) where.lastName = { equals: last, mode: 'insensitive' };
 
     const users = await prisma.user.findMany({ where, select: { id: true } });
-    for (const u of users) {
-      await prisma.notification.create({
-        data: { userId: u.id, title: 'You were mentioned', body: context, type: 'mention' },
-      });
-    }
+    await Promise.all(users.map((u) => createNotification(u.id, 'You were mentioned', context, 'mention')));
   }
 }
 
@@ -77,7 +74,17 @@ export const createPost = async (schoolId: string, authorId: string, input: Crea
       _count: { select: { comments: true } },
     },
   });
+
   notifyMentions(input.content, schoolId, authorId, `${post.author.firstName} mentioned you in a post`).catch(() => {});
+
+  notifySchool(
+    schoolId,
+    authorId,
+    'New announcement',
+    input.content.slice(0, 120),
+    'post_new',
+  ).catch(() => {});
+
   return post;
 };
 

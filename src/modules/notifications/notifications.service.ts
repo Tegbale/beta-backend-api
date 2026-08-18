@@ -44,3 +44,17 @@ export const createNotification = async (
 
   return notification;
 };
+
+export const notifySchool = async (
+  schoolId: string,
+  excludeUserId: string,
+  title: string,
+  body: string,
+  type: string,
+) => {
+  const users = await prisma.user.findMany({
+    where: { schoolId, id: { not: excludeUserId } },
+    select: { id: true },
+  });
+  await Promise.all(users.map((u) => createNotification(u.id, title, body, type)));
+};
