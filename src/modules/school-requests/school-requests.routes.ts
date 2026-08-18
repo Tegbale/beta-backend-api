@@ -31,6 +31,9 @@ router.post(
   ctrl.create,
 );
 
+// Public document proxy — streams file from Cloudinary server-side (no auth header possible on <a> tag)
+router.get('/:id/documents/:type', ctrl.streamDocument);
+
 // Superadmin only
 router.get('/', authenticate, authorize('SUPER_ADMIN'), validate(listRequestsSchema, 'query'), ctrl.list);
 router.get('/:id', authenticate, authorize('SUPER_ADMIN'), ctrl.get);

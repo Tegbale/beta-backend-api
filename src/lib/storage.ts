@@ -1,12 +1,16 @@
 import { env } from '../config/env';
 
-export async function signCloudinaryUrl(url: string | null | undefined): Promise<string | null> {
-  if (!url || env.storage.provider !== 'cloudinary' || !url.includes('cloudinary.com')) return url ?? null;
+export async function generateCloudinaryDownloadUrl(url: string): Promise<string | null> {
+  if (!url.includes('cloudinary.com')) return null;
 
-  const match = url.match(/cloudinary\.com\/[^/]+\/([^/]+)\/upload\/v(\d+)\/(.+)$/);
-  if (!match) return url;
+  const match = url.match(/cloudinary\.com\/[^/]+\/([^/]+)\/upload\/v\d+\/(.+)$/);
+  if (!match) return null;
 
-  const [, resourceType, version, publicId] = match;
+  const [, resourceType, publicIdWithExt] = match;
+  const dotIdx = publicIdWithExt.lastIndexOf('.');
+  const format = dotIdx >= 0 ? publicIdWithExt.slice(dotIdx + 1) : '';
+  const publicId = dotIdx >= 0 ? publicIdWithExt.slice(0, dotIdx) : publicIdWithExt;
+
   const { v2: cloudinary } = await import('cloudinary');
   cloudinary.config({
     cloud_name: env.cloudinary.cloudName,
@@ -14,13 +18,13 @@ export async function signCloudinaryUrl(url: string | null | undefined): Promise
     api_secret: env.cloudinary.apiSecret,
   });
 
-  return cloudinary.url(publicId, {
-    resource_type: resourceType as 'image' | 'video' | 'raw',
+  // private_download_url uses api.cloudinary.com (API credentials, not CDN)
+  // This bypasses all CDN delivery restrictions on the Cloudinary account
+  return (cloudinary.utils as any).private_download_url(publicId, format, {
+    resource_type: resourceType,
     type: 'upload',
-    sign_url: true,
-    secure: true,
-    version: parseInt(version, 10),
-  }) ?? url;
+    expires_at: Math.floor(Date.now() / 1000) + 300,
+  }) as string;
 }
 
 export async function uploadBuffer(
