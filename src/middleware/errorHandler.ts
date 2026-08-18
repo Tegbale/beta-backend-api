@@ -86,7 +86,5 @@ export const errorHandler = (err: unknown, _req: Request, res: Response, _next: 
   }
 
   logger.error(err);
-  const errMsg = err instanceof Error ? err.message : String(err);
-  const errType = err instanceof Error ? err.constructor.name : typeof err;
-  res.status(500).json({ success: false, message: 'Something went wrong on our end. Please try again later.', _debug: { type: errType, message: errMsg } });
+  res.status(500).json({ success: false, message: 'Something went wrong on our end. Please try again later.' });
 };
