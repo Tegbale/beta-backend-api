@@ -7,6 +7,7 @@ export const createStaffSchema = z.object({
   phone: z.string().optional(),
   role: z.enum(['SCHOOL_ADMIN', 'STAFF', 'TEACHER']),
   jobTitle: z.string().max(100).optional(),
+  schoolId: z.string().optional(),
 });
 
 export const updateStaffSchema = z.object({

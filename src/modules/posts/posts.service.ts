@@ -1,6 +1,7 @@
 import { prisma } from '../../lib/prisma';
 import { AppError } from '../../middleware/errorHandler';
 import { CreatePostInput, ListQuery, CreateCommentInput } from './posts.schema';
+import { createNotification, notifySchool } from '../notifications/notifications.service';
 
 const authorSelect = {
   id: true,
@@ -10,10 +11,11 @@ const authorSelect = {
   avatar: true,
 };
 
-export const listPosts = async (schoolId: string, query: ListQuery) => {
+export const listPosts = async (schoolId: string | null | undefined, query: ListQuery) => {
   const { page, limit, search } = query;
   const skip = (page - 1) * limit;
-  const where: any = { schoolId };
+  const where: any = {};
+  if (schoolId) where.schoolId = schoolId;
   if (search) where.content = { contains: search, mode: 'insensitive' };
 
   const [posts, total] = await prisma.$transaction([
@@ -33,9 +35,10 @@ export const listPosts = async (schoolId: string, query: ListQuery) => {
   return { posts, total };
 };
 
-export const getPost = async (schoolId: string, id: string) => {
+export const getPost = async (schoolId: string | null | undefined, id: string) => {
+  const where = schoolId ? { id, schoolId } : { id };
   const post = await prisma.post.findFirst({
-    where: { id, schoolId },
+    where,
     include: {
       author: { select: authorSelect },
       _count: { select: { comments: true } },
@@ -59,11 +62,7 @@ async function notifyMentions(content: string, schoolId: string, authorId: strin
     if (last) where.lastName = { equals: last, mode: 'insensitive' };
 
     const users = await prisma.user.findMany({ where, select: { id: true } });
-    for (const u of users) {
-      await prisma.notification.create({
-        data: { userId: u.id, title: 'You were mentioned', body: context, type: 'mention' },
-      });
-    }
+    await Promise.all(users.map((u) => createNotification(u.id, 'You were mentioned', context, 'mention')));
   }
 }
 
@@ -75,7 +74,17 @@ export const createPost = async (schoolId: string, authorId: string, input: Crea
       _count: { select: { comments: true } },
     },
   });
+
   notifyMentions(input.content, schoolId, authorId, `${post.author.firstName} mentioned you in a post`).catch(() => {});
+
+  notifySchool(
+    schoolId,
+    authorId,
+    'New announcement',
+    input.content.slice(0, 120),
+    'post_new',
+  ).catch(() => {});
+
   return post;
 };
 

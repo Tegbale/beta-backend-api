@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../../types';
 import * as service from './parents.service';
+import { AppError } from '../../middleware/errorHandler';
 import { success, created, paginated } from '../../utils/response';
 
 const resolveSchoolId = (req: AuthRequest) =>
@@ -67,7 +68,7 @@ export const removeWard = async (req: AuthRequest, res: Response, next: NextFunc
 
 export const bulkImport = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    if (!req.file) return next(new Error('No file uploaded'));
+    if (!req.file) return next(new AppError('No file uploaded', 400));
     success(res, await service.bulkCreateParents(req.file.buffer), 'Import complete');
   } catch (err) { next(err); }
 };

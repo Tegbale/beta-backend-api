@@ -2,3 +2,5 @@ node_modules/
 dist/
 .env
 *.log
+Tegbale_API.postman_collection.json
+CLAUDE.md

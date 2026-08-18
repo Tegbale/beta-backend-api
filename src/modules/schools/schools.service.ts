@@ -19,12 +19,15 @@ export const listSchools = async (query: ListQuery) => {
 };
 
 export const getSchool = async (id: string) => {
-  const school = await prisma.school.findUnique({
-    where: { id },
-    include: { _count: { select: { classrooms: true, students: true, staff: true } } },
-  });
+  const [school, teacherCount] = await prisma.$transaction([
+    prisma.school.findUnique({
+      where: { id },
+      include: { _count: { select: { classrooms: true, students: true, staff: true } } },
+    }),
+    prisma.user.count({ where: { schoolId: id, role: 'TEACHER' } }),
+  ]);
   if (!school) throw new AppError('School not found', 404);
-  return school;
+  return { ...school, teacherCount };
 };
 
 export const createSchool = async (input: CreateSchoolInput) => {

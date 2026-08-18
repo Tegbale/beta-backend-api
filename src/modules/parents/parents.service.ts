@@ -6,6 +6,7 @@ import { parseImportFile } from '../../utils/importParser';
 import { sendMail } from '../../lib/mailer';
 import { parentWelcomeEmail } from '../../lib/emailTemplates';
 import { CreateParentInput, UpdateParentInput, ListQuery } from './parents.schema';
+import { createNotification } from '../notifications/notifications.service';
 
 const parentInclude = {
   user: {
@@ -118,17 +119,26 @@ export const deleteParent = async (id: string) => {
 };
 
 export const assignWard = async (parentId: string, studentId: string, schoolId?: string | null) => {
-  await getParent(parentId);
+  const parent = await getParent(parentId);
   const where: any = { id: studentId };
   if (schoolId) where.schoolId = schoolId;
   const student = await prisma.student.findFirst({ where });
   if (!student) throw new AppError('Student not found in this school', 404);
 
-  return prisma.parent.update({
+  const result = await prisma.parent.update({
     where: { id: parentId },
     data: { wards: { connect: { id: studentId } } },
     include: parentInclude,
   });
+
+  createNotification(
+    parent.userId,
+    'Ward linked',
+    `${student.firstName} ${student.lastName} has been linked to your profile.`,
+    'ward_assigned',
+  ).catch(() => {});
+
+  return result;
 };
 
 export const removeWard = async (parentId: string, studentId: string) => {

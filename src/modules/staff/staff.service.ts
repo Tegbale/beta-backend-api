@@ -8,6 +8,7 @@ import { sendMail } from '../../lib/mailer';
 import { staffWelcomeEmail } from '../../lib/emailTemplates';
 import { env } from '../../config/env';
 import { CreateStaffInput, UpdateStaffInput, ListQuery } from './staff.schema';
+import { createNotification } from '../notifications/notifications.service';
 
 export const listStaff = async (schoolId: string | null | undefined, query: ListQuery) => {
   const { page, limit, search, role } = query;
@@ -38,9 +39,10 @@ export const listStaff = async (schoolId: string | null | undefined, query: List
   return { staff, total };
 };
 
-export const getStaff = async (schoolId: string, userId: string) => {
+export const getStaff = async (schoolId: string | null | undefined, userId: string) => {
+  const where = schoolId ? { id: userId, schoolId } : { id: userId };
   const user = await prisma.user.findFirst({
-    where: { id: userId, schoolId },
+    where,
     select: {
       id: true, email: true, firstName: true, lastName: true, role: true,
       jobTitle: true, phone: true, avatar: true, isActive: true, createdAt: true,
@@ -56,7 +58,9 @@ export const getStaff = async (schoolId: string, userId: string) => {
   return user;
 };
 
-export const createStaff = async (schoolId: string, input: CreateStaffInput, callerRole: string) => {
+export const createStaff = async (schoolId: string | null | undefined, input: CreateStaffInput, callerRole: string) => {
+  if (!schoolId) throw new AppError('schoolId is required', 400);
+
   if (callerRole === 'SCHOOL_ADMIN' && input.role === 'SCHOOL_ADMIN') {
     throw new AppError('School admins cannot create other school admin accounts', 403);
   }
@@ -86,6 +90,13 @@ export const createStaff = async (schoolId: string, input: CreateStaffInput, cal
     'Your Tègbalé account is ready',
     staffWelcomeEmail(`${user.firstName} ${user.lastName}`, school?.name ?? 'your school', user.email, tempPassword, loginUrl),
   ).catch((err: any) => console.error(`[mailer] ${err.message}`));
+
+  createNotification(
+    user.id,
+    'Welcome to Tègbalé',
+    `Your account has been created at ${school?.name ?? 'your school'}. Check your email for login details.`,
+    'account_created',
+  ).catch(() => {});
 
   return { user, tempPassword };
 };
@@ -142,7 +153,7 @@ export const bulkCreateStaff = async (schoolId: string, role: 'TEACHER' | 'STAFF
   return results;
 };
 
-export const updateStaff = async (schoolId: string, userId: string, input: UpdateStaffInput) => {
+export const updateStaff = async (schoolId: string | null | undefined, userId: string, input: UpdateStaffInput) => {
   await getStaff(schoolId, userId);
   return prisma.user.update({
     where: { id: userId },
@@ -151,7 +162,7 @@ export const updateStaff = async (schoolId: string, userId: string, input: Updat
   });
 };
 
-export const toggleStaffStatus = async (schoolId: string, userId: string) => {
+export const toggleStaffStatus = async (schoolId: string | null | undefined, userId: string) => {
   const user = await getStaff(schoolId, userId);
   return prisma.user.update({ where: { id: userId }, data: { isActive: !user.isActive } });
 };

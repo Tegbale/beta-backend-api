@@ -50,8 +50,8 @@ export function newRequestNotificationEmail(
         ${(cacDocumentUrl || govtDocumentUrl) ? `
         <p style="margin-top:16px;font-weight:600;font-size:14px">Uploaded Documents</p>
         <ul style="font-size:14px;padding-left:16px">
-          ${cacDocumentUrl ? `<li><a href="${cacDocumentUrl}" style="color:#408ED5">CAC Certificate</a></li>` : ''}
-          ${govtDocumentUrl ? `<li><a href="${govtDocumentUrl}" style="color:#408ED5">Government Approval Document</a></li>` : ''}
+          ${cacDocumentUrl ? `<li><a href="${cacDocumentUrl}" target="_blank" rel="noopener noreferrer" style="color:#408ED5">CAC Certificate</a></li>` : ''}
+          ${govtDocumentUrl ? `<li><a href="${govtDocumentUrl}" target="_blank" rel="noopener noreferrer" style="color:#408ED5">Government Approval Document</a></li>` : ''}
         </ul>` : ''}
         <p style="margin-top:24px;font-size:13px;color:#6b7280">Request ID: ${requestId}<br/>Log in to the Tègbalé Super Admin portal to review and approve this request.</p>
       </div>
