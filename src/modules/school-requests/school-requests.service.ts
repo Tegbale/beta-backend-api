@@ -1,3 +1,4 @@
+import path from 'path';
 import { prisma } from '../../lib/prisma';
 import { hashPassword } from '../../utils/password';
 import { generatePassword } from '../../utils/generatePassword';
@@ -7,6 +8,7 @@ import { uploadBuffer } from '../../lib/storage';
 import { AppError } from '../../middleware/errorHandler';
 import { env } from '../../config/env';
 import { CreateRequestInput, ListRequestsQuery, RejectRequestInput } from './school-requests.schema';
+import { createNotification } from '../notifications/notifications.service';
 
 export interface UploadedDocuments {
   cacDocument?: Express.Multer.File;
@@ -18,18 +20,22 @@ export const createRequest = async (input: CreateRequestInput, docs?: UploadedDo
   let govtDocumentUrl: string | undefined;
 
   if (docs?.cacDocument) {
+    const ext = path.extname(docs.cacDocument.originalname).toLowerCase() || '.pdf';
     cacDocumentUrl = await uploadBuffer(
       docs.cacDocument.buffer,
       'tegbale/school-requests',
-      `${Date.now()}-cac`,
+      `${Date.now()}-cac${ext}`,
+      'raw',
     );
   }
 
   if (docs?.govtDocument) {
+    const ext = path.extname(docs.govtDocument.originalname).toLowerCase() || '.pdf';
     govtDocumentUrl = await uploadBuffer(
       docs.govtDocument.buffer,
       'tegbale/school-requests',
-      `${Date.now()}-govt`,
+      `${Date.now()}-govt${ext}`,
+      'raw',
     );
   }
 
@@ -39,7 +45,6 @@ export const createRequest = async (input: CreateRequestInput, docs?: UploadedDo
 
   const contactName = `${input.contactFirstName} ${input.contactLastName}`;
 
-  // Fire emails without blocking the response
   sendMail(
     input.contactEmail,
     'We\'ve received your request — Tègbalé',
@@ -47,7 +52,7 @@ export const createRequest = async (input: CreateRequestInput, docs?: UploadedDo
   ).catch(() => {});
 
   sendMail(
-    env.email.superadminEmail,
+    env.mailgun.superadminEmail,
     `New school request: ${input.schoolName}`,
     newRequestNotificationEmail(
       input.schoolName,
@@ -58,8 +63,6 @@ export const createRequest = async (input: CreateRequestInput, docs?: UploadedDo
       input.country,
       input.message,
       request.id,
-      cacDocumentUrl,
-      govtDocumentUrl,
     ),
   ).catch(() => {});
 
@@ -85,6 +88,14 @@ export const getRequest = async (id: string) => {
   return request;
 };
 
+export const getDocumentUrl = async (id: string, type: 'cac' | 'govt'): Promise<string> => {
+  const request = await prisma.schoolRequest.findUnique({ where: { id } });
+  if (!request) throw new AppError('Request not found', 404);
+  const url = type === 'cac' ? request.cacDocumentUrl : request.govtDocumentUrl;
+  if (!url) throw new AppError('Document not found', 404);
+  return url;
+};
+
 export const approveRequest = async (id: string) => {
   const request = await getRequest(id);
   if (request.status !== 'PENDING') throw new AppError('Request has already been processed', 400);
@@ -92,7 +103,6 @@ export const approveRequest = async (id: string) => {
   const tempPassword = generatePassword(12);
   const schoolEmail = request.contactEmail;
 
-  // Create school and admin user in a transaction
   const { school, admin } = await prisma.$transaction(async (tx) => {
     const school = await tx.school.create({
       data: {
@@ -120,7 +130,6 @@ export const approveRequest = async (id: string) => {
     return { school, admin };
   });
 
-  // Send credential email to the new school admin
   const loginUrl = `${env.frontendUrl}/login`;
   sendMail(
     admin.email,
@@ -132,6 +141,13 @@ export const approveRequest = async (id: string) => {
       tempPassword,
       loginUrl,
     ),
+  ).catch(() => {});
+
+  createNotification(
+    admin.id,
+    'School approved',
+    `Your school "${school.name}" is now active on Tègbalé.`,
+    'school_approved',
   ).catch(() => {});
 
   return { school, admin: { id: admin.id, email: admin.email, firstName: admin.firstName, lastName: admin.lastName } };

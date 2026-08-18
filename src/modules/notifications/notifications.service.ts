@@ -28,6 +28,10 @@ export const markAllAsRead = async (userId: string) => {
   emitToUser(userId, SocketEvents.NOTIFICATION_COUNT, { count: 0 });
 };
 
+export const getUnreadCount = async (userId: string) => {
+  return prisma.notification.count({ where: { userId, isRead: false } });
+};
+
 export const createNotification = async (
   userId: string,
   title: string,
@@ -43,4 +47,18 @@ export const createNotification = async (
   emitToUser(userId, SocketEvents.NOTIFICATION_COUNT, { count: unreadCount });
 
   return notification;
+};
+
+export const notifySchool = async (
+  schoolId: string,
+  excludeUserId: string,
+  title: string,
+  body: string,
+  type: string,
+) => {
+  const users = await prisma.user.findMany({
+    where: { schoolId, id: { not: excludeUserId } },
+    select: { id: true },
+  });
+  await Promise.all(users.map((u) => createNotification(u.id, title, body, type)));
 };

@@ -17,6 +17,7 @@ export const listQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(20),
   status: z.enum(['UPCOMING', 'ONGOING', 'COMPLETED', 'CANCELLED']).optional(),
   search: z.string().optional(),
+  schoolId: z.string().optional(),
 });
 
 export type CreateEventInput = z.infer<typeof createEventSchema>;

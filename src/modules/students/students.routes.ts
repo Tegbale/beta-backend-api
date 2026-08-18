@@ -11,10 +11,10 @@ router.use(authenticate, authorize('SCHOOL_ADMIN', 'STAFF', 'TEACHER', 'SUPER_AD
 
 router.get('/', validate(listQuerySchema, 'query'), ctrl.list);
 router.get('/:id', ctrl.get);
-router.post('/', authorize('SCHOOL_ADMIN', 'STAFF'), validate(createStudentSchema), ctrl.create);
-router.patch('/:id', authorize('SCHOOL_ADMIN', 'STAFF'), validate(updateStudentSchema), ctrl.update);
-router.delete('/:id', authorize('SCHOOL_ADMIN'), ctrl.remove);
-router.patch('/:id/classroom', authorize('SCHOOL_ADMIN', 'STAFF'), validate(assignClassroomSchema), ctrl.assignClassroom);
+router.post('/', authorize('SCHOOL_ADMIN', 'STAFF', 'SUPER_ADMIN'), validate(createStudentSchema), ctrl.create);
+router.patch('/:id', authorize('SCHOOL_ADMIN', 'STAFF', 'SUPER_ADMIN'), validate(updateStudentSchema), ctrl.update);
+router.delete('/:id', authorize('SCHOOL_ADMIN', 'SUPER_ADMIN'), ctrl.remove);
+router.patch('/:id/classroom', authorize('SCHOOL_ADMIN', 'STAFF', 'SUPER_ADMIN'), validate(assignClassroomSchema), ctrl.assignClassroom);
 router.post('/bulk-import', authorize('SCHOOL_ADMIN', 'STAFF', 'SUPER_ADMIN'), importUpload.single('file'), ctrl.bulkImport);
 
 export default router;

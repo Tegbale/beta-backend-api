@@ -6,6 +6,8 @@ export const createStaffSchema = z.object({
   lastName: z.string().min(1, 'Last name is required').max(100),
   phone: z.string().optional(),
   role: z.enum(['SCHOOL_ADMIN', 'STAFF', 'TEACHER']),
+  jobTitle: z.string().max(100).optional(),
+  schoolId: z.string().optional(),
 });
 
 export const updateStaffSchema = z.object({
@@ -13,6 +15,7 @@ export const updateStaffSchema = z.object({
   lastName: z.string().min(1).optional(),
   phone: z.string().optional(),
   avatar: z.string().url().optional(),
+  jobTitle: z.string().max(100).optional(),
 });
 
 export const listQuerySchema = z.object({

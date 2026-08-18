@@ -73,6 +73,11 @@ export const errorHandler = (err: unknown, _req: Request, res: Response, _next: 
       res.status(400).json({ success: false, message: 'This record is linked to other data and cannot be removed.' });
       return;
     }
+    if (err.code === 'P2021') {
+      logger.error(`Database table missing: ${err.meta?.table ?? 'unknown'} — run prisma migrate deploy`);
+      res.status(503).json({ success: false, message: 'Service temporarily unavailable. Please try again shortly.' });
+      return;
+    }
   }
 
   if (err instanceof Prisma.PrismaClientValidationError) {

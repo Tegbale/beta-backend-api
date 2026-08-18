@@ -45,7 +45,7 @@ export const remove = async (req: AuthRequest, res: Response, next: NextFunction
 
 export const bulkImport = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    if (!req.file) return next(new Error('No file uploaded'));
+    if (!req.file) return next(new AppError('No file uploaded', 400));
     const sid = req.user!.role === 'SUPER_ADMIN' ? (req.query.schoolId as string) : req.user!.schoolId;
     if (!sid) return next(new AppError('schoolId is required', 400));
     success(res, await service.bulkCreateClassrooms(sid, req.file.buffer), 'Import complete');

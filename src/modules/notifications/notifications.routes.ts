@@ -7,6 +7,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', ctrl.list);
+router.get('/unread-count', ctrl.getCount);
 router.patch('/:id/read', ctrl.markRead);
 router.patch('/read-all', ctrl.markAllRead);
 

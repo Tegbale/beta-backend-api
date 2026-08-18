@@ -1,19 +1,13 @@
 {
   "info": {
+    "_postman_id": "c2d0974d-4253-4296-9c03-fcb6db02dbb8",
     "name": "Tègbalé API",
-    "_postman_id": "tegbale-api-collection-v1",
-    "description": "Complete API reference for the Tègbalé School Management Platform.\n\n**Setup:**\n1. Set `baseUrl` to `https://tegbale-api.onrender.com` (staging) or `http://localhost:3001` (local)\n2. Call **Login** — the collection auto-saves the token to `{{token}}`\n3. All authenticated requests use `Bearer {{token}}` automatically\n\n**Roles:** SUPER_ADMIN · SCHOOL_ADMIN · STAFF · TEACHER · PARENT",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [
-    { "key": "baseUrl", "value": "https://tegbale-api.onrender.com", "type": "string" },
-    { "key": "token", "value": "", "type": "string" },
-    { "key": "schoolId", "value": "", "type": "string" },
-    { "key": "userId", "value": "", "type": "string" }
-  ],
-  "auth": {
-    "type": "bearer",
-    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+    "description": "Complete API test suite for the Tègbalé School Management Platform.\n\n**Setup:**\n1. `baseUrl` is already set to `https://staging-api.tegbale.com`\n2. Run **Login** — the test script auto-saves the token to `{{token}}` and `{{refreshToken}}`\n3. All authenticated requests use `Bearer {{token}}` automatically\n4. After creating resources, copy returned IDs into the collection variables\n\n**Roles:** SUPER_ADMIN · SCHOOL_ADMIN · STAFF · TEACHER · PARENT\n\n**Typical happy-path flow:**\n1. Health Check → Login → Get Me\n2. Create School → Create Staff → Create Classroom\n3. Create Student → Assign to Classroom\n4. Create Parent → Assign Ward\n5. Create Event → Create Post → Send Message",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "createdAt": "2026-07-14T15:55:05.000Z",
+    "updatedAt": "2026-08-13T15:13:34.000Z",
+    "lastUpdatedBy": "11087619",
+    "uid": "11087619-c2d0974d-4253-4296-9c03-fcb6db02dbb8"
   },
   "item": [
     {
@@ -21,18 +15,166 @@
       "item": [
         {
           "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Status is ok', () => pm.expect(pm.response.json().status).to.eql('ok'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "3cd7f6f2-e1c8-47ad-a6e8-ce956ed4aff6",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] },
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
             "description": "Public — no auth required. Returns server status and timestamp."
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-3cd7f6f2-e1c8-47ad-a6e8-ce956ed4aff6"
         }
-      ]
+      ],
+      "id": "76b97fbf-6483-4252-9df5-30d0fd82f96c",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-76b97fbf-6483-4252-9df5-30d0fd82f96c"
     },
     {
       "name": "Auth",
       "item": [
+        {
+          "name": "Register (SUPER_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409 (Super Admin already exists)', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "id": "630ea580-d286-4e22-8da4-1de82440682e",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"superadmin@tegbale.com\",\n  \"password\": \"Admin@1234\",\n  \"firstName\": \"Super\",\n  \"lastName\": \"Admin\",\n  \"phone\": \"+2348000000000\",\n  \"role\": \"SUPER_ADMIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a SUPER_ADMIN account (no schoolId needed). For other roles include `schoolId`."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-630ea580-d286-4e22-8da4-1de82440682e"
+        },
+        {
+          "name": "Register (SCHOOL_ADMIN)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = Math.random().toString(36).substring(2, 7);",
+                  "pm.variables.set('schoolAdminEmail', 'admin.' + id + '@school.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 201 or 409', () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]));"
+                ]
+              }
+            }
+          ],
+          "id": "43e73170-f465-41e7-aa03-82f72206f135",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{schoolAdminEmail}}\",\n  \"password\": \"Password@123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+2348000000001\",\n  \"role\": \"SCHOOL_ADMIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Set `{{schoolId}}` before running. Role options: SUPER_ADMIN | SCHOOL_ADMIN | STAFF | TEACHER | PARENT."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-43e73170-f465-41e7-aa03-82f72206f135"
+        },
         {
           "name": "Login",
           "event": [
@@ -40,893 +182,3919 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "const res = pm.response.json();",
-                  "if (res.data && res.data.accessToken) {",
-                  "  pm.collectionVariables.set('token', res.data.accessToken);",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('Has accessToken', () => pm.expect(b.data).to.have.property('accessToken'));",
+                  "if (b.data && b.data.accessToken) {",
+                  "  pm.collectionVariables.set('token', b.data.accessToken);",
+                  "  console.log('Token saved');",
+                  "}",
+                  "if (b.data && b.data.refreshToken) {",
+                  "  pm.collectionVariables.set('refreshToken', b.data.refreshToken);",
+                  "}",
+                  "if (b.data && b.data.user) {",
+                  "  pm.collectionVariables.set('userId', b.data.user.id || '');",
+                  "  if (b.data.user.schoolId) pm.collectionVariables.set('schoolId', b.data.user.schoolId);",
                   "}"
                 ],
                 "type": "text/javascript"
               }
             }
           ],
+          "id": "83f8672a-5cf6-4c1c-9b0a-0aa4b32ebfaa",
           "request": {
-            "auth": { "type": "noauth" },
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api","auth","login"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"superadmin@tegbale.com\",\n  \"password\": \"Admin@1234\"\n}",
-              "options": { "raw": { "language": "json" } }
+            "auth": {
+              "type": "noauth"
             },
-            "description": "Returns `accessToken` and `refreshToken`. The test script auto-saves the access token to `{{token}}`."
-          }
-        },
-        {
-          "name": "Register",
-          "request": {
-            "auth": { "type": "noauth" },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api","auth","register"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@school.com\",\n  \"password\": \"Password@123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phone\": \"+2348000000000\",\n  \"role\": \"SCHOOL_ADMIN\",\n  \"schoolId\": \"{{schoolId}}\"\n}",
-              "options": { "raw": { "language": "json" } }
-            }
-          }
-        },
-        {
-          "name": "Get Current User (me)",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api","auth","me"] },
-            "description": "Returns the authenticated user's profile."
-          }
+              "raw": "{\n  \"email\": \"admin@tegbale.com\",\n  \"password\": \"Admin@1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Returns `accessToken` and `refreshToken`. The test script auto-saves both tokens and the user/school IDs."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-83f8672a-5cf6-4c1c-9b0a-0aa4b32ebfaa"
         },
         {
           "name": "Refresh Token",
-          "request": {
-            "auth": { "type": "noauth" },
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/refresh", "host": ["{{baseUrl}}"], "path": ["api","auth","refresh"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"<paste_refresh_token>\"\n}",
-              "options": { "raw": { "language": "json" } }
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.accessToken) pm.collectionVariables.set('token', b.data.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
             }
-          }
-        },
-        {
-          "name": "Logout",
+          ],
+          "id": "6c94ddf0-4e49-48a0-a58e-bfde602ec7d8",
           "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api","auth","logout"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"<paste_refresh_token>\"\n}",
-              "options": { "raw": { "language": "json" } }
-            }
-          }
-        },
-        {
-          "name": "Change Password",
-          "request": {
-            "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/change-password", "host": ["{{baseUrl}}"], "path": ["api","auth","change-password"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"OldPassword@123\",\n  \"newPassword\": \"NewPassword@456\"\n}",
-              "options": { "raw": { "language": "json" } }
-            }
-          }
-        },
-        {
-          "name": "Forgot Password",
-          "request": {
-            "auth": { "type": "noauth" },
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/forgot-password", "host": ["{{baseUrl}}"], "path": ["api","auth","forgot-password"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"user@school.com\"\n}",
-              "options": { "raw": { "language": "json" } }
+            "auth": {
+              "type": "noauth"
             },
-            "description": "Sends a password reset link to the email (if registered). Always returns 200 to avoid leaking registered emails. Link expires in 1 hour."
-          }
-        },
-        {
-          "name": "Reset Password",
-          "request": {
-            "auth": { "type": "noauth" },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/auth/reset-password", "host": ["{{baseUrl}}"], "path": ["api","auth","reset-password"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"<token_from_reset_email>\",\n  \"newPassword\": \"NewPassword@123\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "description": "Validates the reset token and updates the password. All active sessions are invalidated on success."
-          }
-        },
-        {
-          "name": "Verify SMTP (SUPER_ADMIN)",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/auth/verify-smtp", "host": ["{{baseUrl}}"], "path": ["api","auth","verify-smtp"] },
-            "description": "Tests the SMTP connection from the server. SUPER_ADMIN only."
-          }
-        }
-      ]
-    },
-    {
-      "name": "Schools",
-      "description": "SUPER_ADMIN only for all write operations.",
-      "item": [
-        {
-          "name": "List Schools",
-          "request": {
-            "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/schools?page=1&limit=20&search=",
-              "host": ["{{baseUrl}}"], "path": ["api","schools"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "20" },
-                { "key": "search", "value": "", "description": "Filter by name" }
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
               ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-6c94ddf0-4e49-48a0-a58e-bfde602ec7d8"
         },
         {
-          "name": "Get School",
+          "name": "Get Me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('Has user id', () => pm.expect(b.data).to.have.property('id'));",
+                  "if (b.data && b.data.id) pm.collectionVariables.set('userId', b.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "cf159253-2e02-460e-a88a-523a813c3aea",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/schools/:id", "host": ["{{baseUrl}}"], "path": ["api","schools",":id"], "variable": [{ "key": "id", "value": "{{schoolId}}" }] },
-            "description": "Fetch a single school by ID.\n\n**Roles:** SUPER_ADMIN (any school) · SCHOOL_ADMIN (own school only — schoolId in JWT must match `:id`)"
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Returns the authenticated user's profile."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-cf159253-2e02-460e-a88a-523a813c3aea"
         },
         {
-          "name": "Create School",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/schools", "host": ["{{baseUrl}}"], "path": ["api","schools"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Laurel Nursery and Primary School\",\n  \"email\": \"admin@laurel.edu\",\n  \"phone\": \"+2348012345678\",\n  \"address\": \"12 Education Road, Lagos State\",\n  \"logo\": \"https://example.com/logo.png\"\n}",
-              "options": { "raw": { "language": "json" } }
+          "name": "Update Me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
             }
-          }
-        },
-        {
-          "name": "Update School",
+          ],
+          "id": "42e76524-be1a-4654-9133-6fc3d53fd076",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/schools/:id", "host": ["{{baseUrl}}"], "path": ["api","schools",":id"], "variable": [{ "key": "id", "value": "{{schoolId}}" }] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Laurel Schools\",\n  \"address\": \"Updated Address, Abuja\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"firstName\": \"Super\",\n  \"lastName\": \"Administrator\",\n  \"phone\": \"+2348099999999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Update the authenticated user's own profile (name, phone)."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-42e76524-be1a-4654-9133-6fc3d53fd076"
+        },
+        {
+          "name": "Upload Avatar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 400 (no file in CI)', () => pm.expect(pm.response.code).to.be.oneOf([200, 400]));"
+                ]
+              }
             }
-          }
-        },
-        {
-          "name": "Toggle School Status",
+          ],
+          "id": "0aebef7b-8611-47b7-ab35-fd31104175df",
           "request": {
-            "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/api/schools/:id/toggle-status", "host": ["{{baseUrl}}"], "path": ["api","schools",":id","toggle-status"], "variable": [{ "key": "id", "value": "{{schoolId}}" }] }
-          }
-        },
-        {
-          "name": "Delete School",
-          "request": {
-            "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/schools/:id", "host": ["{{baseUrl}}"], "path": ["api","schools",":id"], "variable": [{ "key": "id", "value": "{{schoolId}}" }] }
-          }
-        }
-      ]
-    },
-    {
-      "name": "School Requests",
-      "description": "Public submission. Review/approval is SUPER_ADMIN only.",
-      "item": [
-        {
-          "name": "Submit School Request (multipart)",
-          "request": {
-            "auth": { "type": "noauth" },
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/api/school-requests", "host": ["{{baseUrl}}"], "path": ["api","school-requests"] },
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "schoolName", "value": "Sunrise Academy", "type": "text" },
-                { "key": "contactFirstName", "value": "Amaka", "type": "text" },
-                { "key": "contactLastName", "value": "Okonkwo", "type": "text" },
-                { "key": "contactEmail", "value": "amaka@sunriseacademy.ng", "type": "text" },
-                { "key": "contactPhone", "value": "+2348033221100", "type": "text" },
-                { "key": "city", "value": "Enugu", "type": "text" },
-                { "key": "country", "value": "Nigeria", "type": "text" },
-                { "key": "message", "value": "We are a government-approved nursery and primary school.", "type": "text" },
-                { "key": "cacDocument", "value": "", "type": "file", "description": "CAC certificate (PDF/JPG/PNG, max 10 MB)" },
-                { "key": "govtDocument", "value": "", "type": "file", "description": "Government approval document (PDF/JPG/PNG, max 10 MB)" }
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "description": "Image file — JPG, PNG, or WebP, max 5 MB",
+                  "value": ""
+                }
               ]
             },
-            "description": "Public endpoint. Send as `multipart/form-data`. Both document files are required. Files are uploaded to Cloudinary."
-          }
-        },
-        {
-          "name": "List School Requests",
-          "request": {
-            "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/school-requests?page=1&limit=20&status=PENDING",
-              "host": ["{{baseUrl}}"], "path": ["api","school-requests"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "20" },
-                { "key": "status", "value": "PENDING", "description": "PENDING | APPROVED | REJECTED (omit for all)" }
+              "raw": "{{baseUrl}}/api/v1/auth/me/avatar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me",
+                "avatar"
               ]
             },
-            "description": "SUPER_ADMIN only."
-          }
+            "description": "Upload or replace the authenticated user's avatar. Attach an image file to the `avatar` field."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-0aebef7b-8611-47b7-ab35-fd31104175df"
         },
         {
-          "name": "Get School Request",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/school-requests/:id", "host": ["{{baseUrl}}"], "path": ["api","school-requests",":id"], "variable": [{ "key": "id", "value": "" }] },
-            "description": "SUPER_ADMIN only."
-          }
-        },
-        {
-          "name": "Approve School Request",
-          "request": {
-            "method": "POST",
-            "url": { "raw": "{{baseUrl}}/api/school-requests/:id/approve", "host": ["{{baseUrl}}"], "path": ["api","school-requests",":id","approve"], "variable": [{ "key": "id", "value": "" }] },
-            "description": "SUPER_ADMIN only. Creates the school and school admin accounts, emails credentials."
-          }
-        },
-        {
-          "name": "Reject School Request",
+          "name": "Change Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "64d81a01-9a47-461e-8ed3-090b777db11d",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/school-requests/:id/reject", "host": ["{{baseUrl}}"], "path": ["api","school-requests",":id","reject"], "variable": [{ "key": "id", "value": "" }] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"notes\": \"Documentation provided is incomplete.\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"currentPassword\": \"Admin@1234\",\n  \"newPassword\": \"Admin@5678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "description": "SUPER_ADMIN only. `notes` is optional."
-          }
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "change-password"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-64d81a01-9a47-461e-8ed3-090b777db11d"
+        },
+        {
+          "name": "Forgot Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "8db56af8-31dd-4b2a-a315-b0c37e87edaf",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"superadmin@tegbale.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "Sends a password reset link. Always returns 200 to avoid leaking registered emails. Link expires in 1 hour."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-8db56af8-31dd-4b2a-a315-b0c37e87edaf"
+        },
+        {
+          "name": "Reset Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 400 (token required)', () => pm.expect(pm.response.code).to.be.oneOf([200, 400]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "26f634a5-4b13-4ab5-bf8d-8595e877cd53",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<token_from_reset_email>\",\n  \"newPassword\": \"Admin@1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "Validates the reset token and updates the password. All active sessions are invalidated on success."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-26f634a5-4b13-4ab5-bf8d-8595e877cd53"
+        },
+        {
+          "name": "Verify SMTP (SUPER_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 500 (infra)', () => pm.expect(pm.response.code).to.be.oneOf([200, 500]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "b9fcb4c1-4f70-453d-8962-bff6554cdefc",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/verify-smtp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-smtp"
+              ]
+            },
+            "description": "Tests the Brevo SMTP connection from the server. SUPER_ADMIN only."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-b9fcb4c1-4f70-453d-8962-bff6554cdefc"
         }
-      ]
+      ],
+      "id": "98364f71-38df-45b1-806b-1a69d0e88424",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-98364f71-38df-45b1-806b-1a69d0e88424"
+    },
+    {
+      "name": "School Requests",
+      "item": [
+        {
+          "name": "Submit School Request (multipart)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const words = ['Sunrise', 'Golden', 'Cedar', 'Maple', 'Royal', 'Summit', 'Crystal', 'Harbor', 'Greenfield', 'Hillside'];",
+                  "const types = ['Academy', 'Institute', 'College', 'School', 'Learning Centre'];",
+                  "const id = Math.random().toString(36).substring(2, 7);",
+                  "const word = words[Math.floor(Math.random() * words.length)];",
+                  "const type = types[Math.floor(Math.random() * types.length)];",
+                  "pm.variables.set('genSchoolName', word + ' ' + type);",
+                  "pm.variables.set('genContactEmail', 'contact.' + id + '@school.ng');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.id) pm.collectionVariables.set('requestId', b.data.id);"
+                ]
+              }
+            }
+          ],
+          "id": "01967acd-7e90-4afb-b3d4-2d924aee3a92",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "schoolName",
+                  "value": "{{genSchoolName}}",
+                  "type": "text"
+                },
+                {
+                  "key": "contactFirstName",
+                  "value": "Amaka",
+                  "type": "text"
+                },
+                {
+                  "key": "contactLastName",
+                  "value": "Okonkwo",
+                  "type": "text"
+                },
+                {
+                  "key": "contactEmail",
+                  "value": "{{genContactEmail}}",
+                  "type": "text"
+                },
+                {
+                  "key": "contactPhone",
+                  "value": "+2348033221100",
+                  "type": "text"
+                },
+                {
+                  "key": "city",
+                  "value": "Enugu",
+                  "type": "text"
+                },
+                {
+                  "key": "country",
+                  "value": "Nigeria",
+                  "type": "text"
+                },
+                {
+                  "key": "message",
+                  "value": "We are a government-approved nursery and primary school.",
+                  "type": "text"
+                },
+                {
+                  "key": "cacDocument",
+                  "type": "file",
+                  "description": "CAC certificate (PDF/JPG/PNG, max 5 MB)",
+                  "value": ""
+                },
+                {
+                  "key": "govtDocument",
+                  "type": "file",
+                  "description": "Government approval document (PDF/JPG/PNG, max 5 MB)",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/school-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "school-requests"
+              ]
+            },
+            "description": "Public endpoint — no auth needed. Send as `multipart/form-data`. Files are uploaded to Cloudinary."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-01967acd-7e90-4afb-b3d4-2d924aee3a92"
+        },
+        {
+          "name": "List School Requests (SUPER_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "const list = b.data && b.data.requests ? b.data.requests : (Array.isArray(b.data) ? b.data : []);",
+                  "pm.test('Returns array', () => pm.expect(list).to.be.an('array'));",
+                  "if (list.length > 0) pm.collectionVariables.set('requestId', list[0].id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "b8e85dec-0b44-47a0-81f9-f7280de65de8",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/school-requests?page=1&limit=20&status=PENDING",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "school-requests"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "description": "PENDING | APPROVED | REJECTED (omit for all)"
+                }
+              ]
+            },
+            "description": "SUPER_ADMIN only."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-b8e85dec-0b44-47a0-81f9-f7280de65de8"
+        },
+        {
+          "name": "Get School Request (SUPER_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "9be71ad3-01b5-4a6e-8c48-1dd35e8325db",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/school-requests/{{requestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "school-requests",
+                "{{requestId}}"
+              ]
+            },
+            "description": "SUPER_ADMIN only."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-9be71ad3-01b5-4a6e-8c48-1dd35e8325db"
+        },
+        {
+          "name": "Reject School Request (SUPER_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "cad652da-80c9-4720-898d-e2597db84845",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Documentation provided is incomplete. Please resubmit with a valid CAC certificate.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/school-requests/{{requestId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "school-requests",
+                "{{requestId}}",
+                "reject"
+              ]
+            },
+            "description": "SUPER_ADMIN only. `notes` is optional. Runs on the requestId from List. A fresh submit below feeds the Approve step."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-cad652da-80c9-4720-898d-e2597db84845"
+        },
+        {
+          "name": "Submit School Request (for Approve)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const words = ['Sunrise', 'Golden', 'Cedar', 'Maple', 'Royal', 'Summit', 'Crystal', 'Harbor', 'Greenfield', 'Hillside'];",
+                  "const types = ['Academy', 'Institute', 'College', 'School', 'Learning Centre'];",
+                  "const id = Math.random().toString(36).substring(2, 7);",
+                  "const word = words[Math.floor(Math.random() * words.length)];",
+                  "const type = types[Math.floor(Math.random() * types.length)];",
+                  "pm.variables.set('genSchoolName', word + ' ' + type);",
+                  "pm.variables.set('genContactEmail', 'contact.' + id + '@school.ng');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const b = pm.response.json(); if (b.data && b.data.id) pm.collectionVariables.set('approveRequestId', b.data.id);"
+                ]
+              }
+            }
+          ],
+          "id": "0a02125e-181c-459b-85c4-50b949b683f3",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "schoolName",
+                  "value": "{{genSchoolName}}",
+                  "type": "text"
+                },
+                {
+                  "key": "contactFirstName",
+                  "value": "Emeka",
+                  "type": "text"
+                },
+                {
+                  "key": "contactLastName",
+                  "value": "Okafor",
+                  "type": "text"
+                },
+                {
+                  "key": "contactEmail",
+                  "value": "{{genContactEmail}}",
+                  "type": "text"
+                },
+                {
+                  "key": "contactPhone",
+                  "value": "+2348099334455",
+                  "type": "text"
+                },
+                {
+                  "key": "city",
+                  "value": "Abuja",
+                  "type": "text"
+                },
+                {
+                  "key": "country",
+                  "value": "Nigeria",
+                  "type": "text"
+                },
+                {
+                  "key": "message",
+                  "value": "We are a newly approved private school.",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/school-requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "school-requests"
+              ]
+            },
+            "description": "Creates a fresh PENDING request so the Approve step always has something to act on."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-0a02125e-181c-459b-85c4-50b949b683f3"
+        },
+        {
+          "name": "Approve School Request (SUPER_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.school && b.data.school.id) pm.collectionVariables.set('schoolId', b.data.school.id);"
+                ]
+              }
+            }
+          ],
+          "id": "57ec7777-5c8f-48d5-9ac6-95f460859a00",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/school-requests/{{approveRequestId}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "school-requests",
+                "{{approveRequestId}}",
+                "approve"
+              ]
+            },
+            "description": "SUPER_ADMIN only. Creates the school and school-admin account, then emails credentials to the contact."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-57ec7777-5c8f-48d5-9ac6-95f460859a00"
+        }
+      ],
+      "id": "a104ebd4-e2e5-4cdc-8ff4-516aa660504c",
+      "description": "Public submission. Review/approval/rejection is SUPER_ADMIN only.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-a104ebd4-e2e5-4cdc-8ff4-516aa660504c"
+    },
+    {
+      "name": "Schools",
+      "item": [
+        {
+          "name": "List Schools",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "const b = pm.response.json();"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "6cb7ddfa-38cd-4d63-9880-34a70299681d",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/schools?page=1&limit=20&search=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schools"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Filter by school name"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-6cb7ddfa-38cd-4d63-9880-34a70299681d"
+        },
+        {
+          "name": "Get School",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has id', () => pm.expect(pm.response.json().data).to.have.property('id'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "6d6315bf-edd8-47e0-9bca-c2d0c61e0127",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/schools/{{schoolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schools",
+                "{{schoolId}}"
+              ]
+            },
+            "description": "SUPER_ADMIN can fetch any school. SCHOOL_ADMIN can only fetch their own."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-6d6315bf-edd8-47e0-9bca-c2d0c61e0127"
+        },
+        {
+          "name": "Create School",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.id) pm.collectionVariables.set('tempSchoolId', b.data.id);"
+                ]
+              }
+            }
+          ],
+          "id": "e4d71501-729e-42a8-b450-3eeeddbe9a79",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laurel Nursery and Primary School\",\n  \"email\": \"admin@laurel.edu\",\n  \"phone\": \"+2348012345678\",\n  \"address\": \"12 Education Road, Lagos State\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/schools",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schools"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-e4d71501-729e-42a8-b450-3eeeddbe9a79"
+        },
+        {
+          "name": "Update School",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "6e82cf63-3057-4545-94ed-d7485adbb978",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Laurel Schools (Updated)\",\n  \"address\": \"15 Updated Address, Abuja\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/schools/{{tempSchoolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schools",
+                "{{tempSchoolId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-6e82cf63-3057-4545-94ed-d7485adbb978"
+        },
+        {
+          "name": "Toggle School Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "fc32cef4-32e7-49a3-843f-83c840d1141c",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/schools/{{tempSchoolId}}/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schools",
+                "{{tempSchoolId}}",
+                "toggle-status"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-fc32cef4-32e7-49a3-843f-83c840d1141c"
+        },
+        {
+          "name": "Delete School",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 204', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "5b1b5fbb-15f0-45f7-a769-1469e2b67d0f",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/schools/{{tempSchoolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "schools",
+                "{{tempSchoolId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-5b1b5fbb-15f0-45f7-a769-1469e2b67d0f"
+        }
+      ],
+      "id": "ff972eb4-c8a4-4621-8089-125b472cb31f",
+      "description": "SUPER_ADMIN only for all write operations. SCHOOL_ADMIN can read their own school.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-ff972eb4-c8a4-4621-8089-125b472cb31f"
     },
     {
       "name": "Staff",
-      "description": "SCHOOL_ADMIN and SUPER_ADMIN.",
       "item": [
         {
           "name": "List Staff",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.length > 0) {",
+                  "  pm.collectionVariables.set('staffId', b.data[0].id);",
+                  "  const teacher = b.data.find(s => s.role === 'TEACHER');",
+                  "  if (teacher) pm.collectionVariables.set('teacherId', teacher.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "bb8c7b98-9868-4030-92b9-c27e9ff595d4",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/staff?page=1&limit=20&role=TEACHER&schoolId={{schoolId}}",
-              "host": ["{{baseUrl}}"], "path": ["api","staff"],
+              "raw": "{{baseUrl}}/api/v1/staff?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "20" },
-                { "key": "role", "value": "TEACHER", "description": "SCHOOL_ADMIN | STAFF | TEACHER" },
-                { "key": "schoolId", "value": "{{schoolId}}", "description": "Filter by school (SUPER_ADMIN)" },
-                { "key": "search", "value": "", "disabled": true }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "TEACHER",
+                  "description": "SCHOOL_ADMIN | STAFF | TEACHER",
+                  "disabled": true
+                },
+                {
+                  "key": "schoolId",
+                  "value": "{{schoolId}}",
+                  "description": "Filter by school (SUPER_ADMIN only)",
+                  "disabled": true
+                }
               ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-bb8c7b98-9868-4030-92b9-c27e9ff595d4"
         },
         {
           "name": "Get Staff Member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "3ca24819-19cd-4aca-acf2-2b3eef788276",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/staff/:id", "host": ["{{baseUrl}}"], "path": ["api","staff",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/staff/{{staffId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "{{staffId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-3ca24819-19cd-4aca-acf2-2b3eef788276"
         },
         {
           "name": "Create Staff Member",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const first = ['James', 'Sarah', 'Michael', 'Emily', 'David', 'Grace', 'Amara', 'Kofi'];",
+                  "const last = ['Johnson', 'Williams', 'Brown', 'Taylor', 'Davies', 'Wilson', 'Mensah', 'Okafor'];",
+                  "const id = Math.random().toString(36).substring(2, 7);",
+                  "const fn = first[Math.floor(Math.random() * first.length)];",
+                  "const ln = last[Math.floor(Math.random() * last.length)];",
+                  "pm.variables.set('staffFirstName', fn);",
+                  "pm.variables.set('staffLastName', ln);",
+                  "pm.variables.set('staffEmail', fn.toLowerCase() + '.' + ln.toLowerCase() + '.' + id + '@school.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "pm.test('Response has user and tempPassword', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data).to.have.property('user');",
+                  "  pm.expect(b.data).to.have.property('tempPassword');",
+                  "});",
+                  "pm.test('User has jobTitle', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data.user).to.have.property('jobTitle');",
+                  "});",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.user && b.data.user.id) {",
+                  "  pm.collectionVariables.set('staffId', b.data.user.id);",
+                  "  if (b.data.user.role === 'TEACHER') pm.collectionVariables.set('teacherId', b.data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "id": "41466d03-cb70-472d-8aab-b4783dd9f770",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/staff", "host": ["{{baseUrl}}"], "path": ["api","staff"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"teacher@school.com\",\n  \"firstName\": \"Chidi\",\n  \"lastName\": \"Okeke\",\n  \"phone\": \"+2348011223344\",\n  \"role\": \"TEACHER\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\"email\": \"{{staffEmail}}\", \"firstName\": \"{{staffFirstName}}\", \"lastName\": \"{{staffLastName}}\", \"phone\": \"+2348011223344\", \"role\": \"STAFF\", \"jobTitle\": \"Head Teacher\", \"schoolId\": \"{{schoolId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "description": "Creates the staff account and emails temporary credentials. `role`: SCHOOL_ADMIN | STAFF | TEACHER."
-          }
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/staff",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff"
+              ]
+            },
+            "description": "Creates the staff account and emails temporary credentials. `role`: SCHOOL_ADMIN | STAFF | TEACHER. `jobTitle` (optional): free-form label e.g. 'Head Teacher', 'Counsellor', 'School Nurse'. SCHOOL_ADMIN callers cannot set role=SCHOOL_ADMIN (returns 403). Response shape: `{ user, tempPassword }`."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-17T09:57:48.000Z",
+          "uid": "11087619-41466d03-cb70-472d-8aab-b4783dd9f770"
         },
         {
           "name": "Update Staff Member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('jobTitle updated', () => {",
+                  "  const b = pm.response.json();",
+                  "  pm.expect(b.data).to.have.property('jobTitle');",
+                  "  pm.expect(b.data.jobTitle).to.equal('School Nurse');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "id": "e15dba1d-676a-436d-a581-aa2969366915",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/staff/:id", "host": ["{{baseUrl}}"], "path": ["api","staff",":id"], "variable": [{ "key": "id", "value": "" }] },
+            "header": [
+              {
+                "value": "application/json",
+                "key": "Content-Type"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Chidi\",\n  \"lastName\": \"Nwosu\",\n  \"phone\": \"+2348099887766\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"firstName\": \"Chidi\",\n  \"lastName\": \"Nwosu\",\n  \"phone\": \"+2348099887766\",\n  \"jobTitle\": \"School Nurse\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/staff/{{staffId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "{{staffId}}"
+              ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-17T09:49:58.000Z",
+          "uid": "11087619-e15dba1d-676a-436d-a581-aa2969366915"
         },
         {
           "name": "Toggle Staff Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "8fd195f2-3972-4353-b327-6452352ffecf",
           "request": {
             "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/api/staff/:id/toggle-status", "host": ["{{baseUrl}}"], "path": ["api","staff",":id","toggle-status"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/staff/{{staffId}}/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "{{staffId}}",
+                "toggle-status"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-8fd195f2-3972-4353-b327-6452352ffecf"
         },
         {
           "name": "Delete Staff Member",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 204', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "2c77fdcc-d4a9-4f0a-b471-355a578dc895",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/staff/:id", "host": ["{{baseUrl}}"], "path": ["api","staff",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/staff/{{staffId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "{{staffId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-2c77fdcc-d4a9-4f0a-b471-355a578dc895"
         },
         {
           "name": "Bulk Import Staff (CSV/XLSX)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 (no file sent)', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "7e46b346-02c4-4b73-84b0-0d14a01b2dee",
           "request": {
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/api/staff/bulk-import", "host": ["{{baseUrl}}"], "path": ["api","staff","bulk-import"] },
+            "header": [],
             "body": {
               "mode": "formdata",
-              "formdata": [{ "key": "file", "type": "file", "description": "CSV or XLSX file" }]
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "CSV or XLSX. Required columns: email, firstName, lastName, role. Optional: phone",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/staff/bulk-import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "bulk-import"
+              ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-7e46b346-02c4-4b73-84b0-0d14a01b2dee"
         }
-      ]
+      ],
+      "id": "7e9a815e-8ce7-44af-adb6-4e090fdd0029",
+      "description": "SCHOOL_ADMIN and SUPER_ADMIN. Credentials are emailed to the staff member on creation.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-7e9a815e-8ce7-44af-adb6-4e090fdd0029"
     },
     {
       "name": "Classrooms",
-      "description": "SCHOOL_ADMIN, STAFF, and SUPER_ADMIN.",
       "item": [
         {
           "name": "List Classrooms",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.length > 0) pm.collectionVariables.set('classroomId', b.data[0].id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "1e32a5df-d916-406f-9994-aba3341df984",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/classrooms?page=1&limit=20",
-              "host": ["{{baseUrl}}"], "path": ["api","classrooms"],
+              "raw": "{{baseUrl}}/api/v1/classrooms?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classrooms"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "20" },
-                { "key": "search", "value": "", "disabled": true }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-1e32a5df-d916-406f-9994-aba3341df984"
         },
         {
           "name": "Get Classroom",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "37fb5835-f463-40c6-8994-c4187bb20bc7",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/classrooms/:id", "host": ["{{baseUrl}}"], "path": ["api","classrooms",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/classrooms/{{classroomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classrooms",
+                "{{classroomId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-37fb5835-f463-40c6-8994-c4187bb20bc7"
         },
         {
           "name": "Create Classroom",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.id) pm.collectionVariables.set('classroomId', b.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "e575a722-34db-4d63-8544-4f5e6fc56901",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/classrooms", "host": ["{{baseUrl}}"], "path": ["api","classrooms"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Primary 3A\",\n  \"level\": \"Primary 3\",\n  \"schoolId\": \"{{schoolId}}\"\n}",
-              "options": { "raw": { "language": "json" } }
-            }
-          }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/classrooms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classrooms"
+              ]
+            },
+            "description": "SUPER_ADMIN must pass `schoolId`. SCHOOL_ADMIN's schoolId is inferred from their JWT."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-e575a722-34db-4d63-8544-4f5e6fc56901"
         },
         {
           "name": "Update Classroom",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "c8d9bb92-2fd7-48b3-8eaf-4d7070f9c130",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/classrooms/:id", "host": ["{{baseUrl}}"], "path": ["api","classrooms",":id"], "variable": [{ "key": "id", "value": "" }] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Primary 3B\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/classrooms/{{classroomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classrooms",
+                "{{classroomId}}"
+              ]
             }
-          }
-        },
-        {
-          "name": "Delete Classroom",
-          "request": {
-            "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/classrooms/:id", "host": ["{{baseUrl}}"], "path": ["api","classrooms",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-c8d9bb92-2fd7-48b3-8eaf-4d7070f9c130"
         },
         {
           "name": "Assign Teacher to Classroom",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "9fa8c589-718b-4401-9c87-843c4227469f",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/classrooms/:id/teachers", "host": ["{{baseUrl}}"], "path": ["api","classrooms",":id","teachers"], "variable": [{ "key": "id", "value": "" }] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"teacherId\": \"<teacher_user_id>\"\n}",
-              "options": { "raw": { "language": "json" } }
-            }
-          }
+              "raw": "{\n  \"userId\": \"{{teacherId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/classrooms/{{classroomId}}/teachers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classrooms",
+                "{{classroomId}}",
+                "teachers"
+              ]
+            },
+            "description": "The body field is `userId` (not `teacherId`). Set `{{teacherId}}` from a staff member with role TEACHER."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-9fa8c589-718b-4401-9c87-843c4227469f"
         },
         {
           "name": "Remove Teacher from Classroom",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 204', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "8c67efb0-253d-4063-b487-b20d850dab22",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/classrooms/:id/teachers/:teacherId", "host": ["{{baseUrl}}"], "path": ["api","classrooms",":id","teachers",":teacherId"], "variable": [{ "key": "id", "value": "" }, { "key": "teacherId", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/classrooms/{{classroomId}}/teachers/{{teacherId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classrooms",
+                "{{classroomId}}",
+                "teachers",
+                "{{teacherId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-8c67efb0-253d-4063-b487-b20d850dab22"
         },
         {
           "name": "Bulk Import Classrooms (CSV/XLSX)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 (no file sent)', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "47482302-63aa-44be-be1b-c9aac9cbf317",
           "request": {
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/api/classrooms/bulk-import", "host": ["{{baseUrl}}"], "path": ["api","classrooms","bulk-import"] },
+            "header": [],
             "body": {
               "mode": "formdata",
-              "formdata": [{ "key": "file", "type": "file" }]
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "CSV or XLSX. Required columns: name. Optional: level",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/classrooms/bulk-import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classrooms",
+                "bulk-import"
+              ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-47482302-63aa-44be-be1b-c9aac9cbf317"
         }
-      ]
+      ],
+      "id": "18ea75a5-7927-41b5-8b9f-f78023614e39",
+      "description": "SCHOOL_ADMIN, STAFF, and SUPER_ADMIN.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-18ea75a5-7927-41b5-8b9f-f78023614e39"
     },
     {
       "name": "Students",
-      "description": "SCHOOL_ADMIN, STAFF, TEACHER, SUPER_ADMIN.",
       "item": [
         {
           "name": "List Students",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.length > 0) pm.collectionVariables.set('studentId', b.data[0].id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "c8d2470f-ccd6-4199-b3cc-b674c0c689b5",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/students?page=1&limit=20",
-              "host": ["{{baseUrl}}"], "path": ["api","students"],
+              "raw": "{{baseUrl}}/api/v1/students?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "20" },
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "classroomId", "value": "", "disabled": true },
-                { "key": "schoolId", "value": "", "disabled": true, "description": "SUPER_ADMIN filter" }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "classroomId",
+                  "value": "{{classroomId}}",
+                  "disabled": true
+                }
               ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-c8d2470f-ccd6-4199-b3cc-b674c0c689b5"
         },
         {
           "name": "Get Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "780cf7e0-7f98-4281-9c91-1acf3b38cc23",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/students/:id", "host": ["{{baseUrl}}"], "path": ["api","students",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/{{studentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "{{studentId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-780cf7e0-7f98-4281-9c91-1acf3b38cc23"
         },
         {
           "name": "Create Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.id) pm.collectionVariables.set('studentId', b.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "29975db7-ea1f-4a64-a971-8aabf5be5356",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/students", "host": ["{{baseUrl}}"], "path": ["api","students"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Tunde\",\n  \"lastName\": \"Adeyemi\",\n  \"dateOfBirth\": \"2017-03-15T00:00:00Z\",\n  \"gender\": \"male\",\n  \"classroomId\": \"\",\n  \"schoolId\": \"{{schoolId}}\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"firstName\": \"Tunde\",\n  \"lastName\": \"Adeyemi\",\n  \"dateOfBirth\": \"2017-03-15T00:00:00Z\",\n  \"gender\": \"male\",\n  \"classroomId\": \"{{classroomId}}\",\n  \"schoolId\": \"{{schoolId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "description": "`gender`: male | female | other. `schoolId` only required when called by SUPER_ADMIN."
-          }
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students"
+              ]
+            },
+            "description": "`gender`: male | female | other. `classroomId` is optional. SUPER_ADMIN must also pass `schoolId`."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-29975db7-ea1f-4a64-a971-8aabf5be5356"
         },
         {
           "name": "Update Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "43d04221-156e-44ed-9394-9578faa3a99e",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/students/:id", "host": ["{{baseUrl}}"], "path": ["api","students",":id"], "variable": [{ "key": "id", "value": "" }] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Tunde\",\n  \"classroomId\": \"\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"firstName\": \"Tunde\",\n  \"lastName\": \"Adeyemi-Updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/{{studentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "{{studentId}}"
+              ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-43d04221-156e-44ed-9394-9578faa3a99e"
         },
         {
           "name": "Assign Student to Classroom",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "67cb1ed5-b02f-4047-b384-478dc2d72a70",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/students/:id/classroom", "host": ["{{baseUrl}}"], "path": ["api","students",":id","classroom"], "variable": [{ "key": "id", "value": "" }] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"classroomId\": \"\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"classroomId\": \"{{classroomId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/{{studentId}}/classroom",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "{{studentId}}",
+                "classroom"
+              ]
             }
-          }
-        },
-        {
-          "name": "Delete Student",
-          "request": {
-            "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/students/:id", "host": ["{{baseUrl}}"], "path": ["api","students",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-67cb1ed5-b02f-4047-b384-478dc2d72a70"
         },
         {
           "name": "Bulk Import Students (CSV/XLSX)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 (no file sent)', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "876dcb00-a807-48c0-bcc7-ab45c4a7ee9a",
           "request": {
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/api/students/bulk-import", "host": ["{{baseUrl}}"], "path": ["api","students","bulk-import"] },
+            "header": [],
             "body": {
               "mode": "formdata",
-              "formdata": [{ "key": "file", "type": "file" }]
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "CSV or XLSX. Required columns: firstName, lastName. Optional: dateOfBirth, gender, classroomId",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/bulk-import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "bulk-import"
+              ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-876dcb00-a807-48c0-bcc7-ab45c4a7ee9a"
         }
-      ]
+      ],
+      "id": "b9602990-b8f4-4df0-8710-0de3f4903d1a",
+      "description": "SCHOOL_ADMIN, STAFF, TEACHER (read-only), SUPER_ADMIN.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-b9602990-b8f4-4df0-8710-0de3f4903d1a"
     },
     {
       "name": "Parents",
-      "description": "SUPER_ADMIN and SCHOOL_ADMIN for management. Parents can read their own wards.",
       "item": [
         {
           "name": "List Parents",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.length > 0) pm.collectionVariables.set('parentId', b.data[0].id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "4cee6f9c-8621-400c-819d-33dea5abc541",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/parents?page=1&limit=20",
-              "host": ["{{baseUrl}}"], "path": ["api","parents"],
+              "raw": "{{baseUrl}}/api/v1/parents?page=1&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "parents"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "20" },
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "schoolId", "value": "", "disabled": true }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "schoolId",
+                  "value": "{{schoolId}}",
+                  "disabled": true
+                }
               ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-4cee6f9c-8621-400c-819d-33dea5abc541"
         },
         {
           "name": "Get Parent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "5a8d67bc-e627-4fd9-9627-2cdab1bce43c",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/parents/:id", "host": ["{{baseUrl}}"], "path": ["api","parents",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents/{{parentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "parents",
+                "{{parentId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-5a8d67bc-e627-4fd9-9627-2cdab1bce43c"
         },
         {
-          "name": "Get My Wards (PARENT)",
+          "name": "Get My Wards (PARENT only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "660647a4-852a-4ef4-a3b9-b9e7fffd50d5",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/parents/me/wards", "host": ["{{baseUrl}}"], "path": ["api","parents","me","wards"] },
-            "description": "Returns the wards linked to the authenticated parent."
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents/me/wards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "parents",
+                "me",
+                "wards"
+              ]
+            },
+            "description": "Returns the wards linked to the authenticated PARENT. Login as a PARENT to test this."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-660647a4-852a-4ef4-a3b9-b9e7fffd50d5"
         },
         {
           "name": "Create Parent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.id) pm.collectionVariables.set('parentId', b.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = Math.random().toString(36).substring(2, 7);",
+                  "pm.variables.set('parentEmail', 'parent.' + id + '@school.com');",
+                  "pm.variables.set('parentPhone', '+234801' + Math.floor(1000000 + Math.random() * 9000000));"
+                ]
+              }
+            }
+          ],
+          "id": "0b30a759-bf38-4bb3-8623-1fad4e1c1f9b",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/parents", "host": ["{{baseUrl}}"], "path": ["api","parents"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"parent@example.com\",\n  \"firstName\": \"Ngozi\",\n  \"lastName\": \"Eze\",\n  \"phone\": \"+2348055667788\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"email\": \"{{parentEmail}}\",\n  \"firstName\": \"Ngozi\",\n  \"lastName\": \"Eze\",\n  \"phone\": \"+2348055667788\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "description": "Creates the parent account and emails temporary credentials."
-          }
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "parents"
+              ]
+            },
+            "description": "Creates the parent account and emails temporary credentials to the parent."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-0b30a759-bf38-4bb3-8623-1fad4e1c1f9b"
         },
         {
           "name": "Update Parent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "93fd0ae7-9287-40ac-898e-2acafc8a7004",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/parents/:id", "host": ["{{baseUrl}}"], "path": ["api","parents",":id"], "variable": [{ "key": "id", "value": "" }] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"+2348099001122\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"firstName\": \"Ngozi\",\n  \"phone\": \"+2348099001122\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents/{{parentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "parents",
+                "{{parentId}}"
+              ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-93fd0ae7-9287-40ac-898e-2acafc8a7004"
         },
         {
           "name": "Toggle Parent Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "0adf5365-4d4e-4834-a9f2-8ed83a5c44a7",
           "request": {
             "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/api/parents/:id/toggle-status", "host": ["{{baseUrl}}"], "path": ["api","parents",":id","toggle-status"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents/{{parentId}}/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "parents",
+                "{{parentId}}",
+                "toggle-status"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-0adf5365-4d4e-4834-a9f2-8ed83a5c44a7"
         },
         {
           "name": "Assign Ward to Parent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200, 201]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "53dc2ac1-ce9e-4887-b4ca-5b82ae2ddeb1",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/parents/:id/wards", "host": ["{{baseUrl}}"], "path": ["api","parents",":id","wards"], "variable": [{ "key": "id", "value": "" }] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"studentId\": \"\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"studentId\": \"{{studentId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents/{{parentId}}/wards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "parents",
+                "{{parentId}}",
+                "wards"
+              ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-53dc2ac1-ce9e-4887-b4ca-5b82ae2ddeb1"
         },
         {
           "name": "Remove Ward from Parent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 204', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "24b60f16-0223-45bc-a73d-f0c0272f8c72",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/parents/:id/wards/:studentId", "host": ["{{baseUrl}}"], "path": ["api","parents",":id","wards",":studentId"], "variable": [{ "key": "id", "value": "" }, { "key": "studentId", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents/{{parentId}}/wards/{{studentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "parents",
+                "{{parentId}}",
+                "wards",
+                "{{studentId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-24b60f16-0223-45bc-a73d-f0c0272f8c72"
         },
         {
-          "name": "Delete Parent",
+          "name": "Delete Parent (SUPER_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 204', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "6339a6c4-6d99-4e93-9f8f-8296b390c9fd",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/parents/:id", "host": ["{{baseUrl}}"], "path": ["api","parents",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents/{{parentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "parents",
+                "{{parentId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-6339a6c4-6d99-4e93-9f8f-8296b390c9fd"
         },
         {
           "name": "Bulk Import Parents (CSV/XLSX)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 (no file sent)', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "f8b06665-3155-446e-8792-cb7f75e69279",
           "request": {
             "method": "POST",
-            "url": { "raw": "{{baseUrl}}/api/parents/bulk-import", "host": ["{{baseUrl}}"], "path": ["api","parents","bulk-import"] },
+            "header": [],
             "body": {
               "mode": "formdata",
-              "formdata": [{ "key": "file", "type": "file" }]
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "CSV or XLSX. Required columns: email, firstName, lastName. Optional: phone",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents/bulk-import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "parents",
+                "bulk-import"
+              ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-f8b06665-3155-446e-8792-cb7f75e69279"
         }
-      ]
+      ],
+      "id": "cb11517d-d1c4-48a2-8f48-416ebbb6447a",
+      "description": "SUPER_ADMIN and SCHOOL_ADMIN for management. PARENT role can read their own wards.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-cb11517d-d1c4-48a2-8f48-416ebbb6447a"
     },
     {
       "name": "Events",
-      "description": "All authenticated users can read. SCHOOL_ADMIN/STAFF can create and update.",
       "item": [
         {
           "name": "List Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.length > 0) pm.collectionVariables.set('eventId', b.data[0].id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "95c4aa53-dcfd-43df-8461-7b453df257f6",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/events?page=1&limit=20",
-              "host": ["{{baseUrl}}"], "path": ["api","events"],
+              "raw": "{{baseUrl}}/api/v1/events?page=1&limit=20&schoolId={{schoolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "events"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "20" },
-                { "key": "status", "value": "", "disabled": true, "description": "UPCOMING | ONGOING | COMPLETED | CANCELLED" },
-                { "key": "search", "value": "", "disabled": true }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "schoolId",
+                  "value": "{{schoolId}}",
+                  "description": "Required for SUPER_ADMIN (no school context)"
+                },
+                {
+                  "key": "status",
+                  "value": "UPCOMING",
+                  "description": "UPCOMING | ONGOING | COMPLETED | CANCELLED",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-95c4aa53-dcfd-43df-8461-7b453df257f6"
         },
         {
           "name": "Get Event",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/events/:id", "host": ["{{baseUrl}}"], "path": ["api","events",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
-        },
-        {
-          "name": "Create Event",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/events", "host": ["{{baseUrl}}"], "path": ["api","events"] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"End of Term Concert\",\n  \"description\": \"Students showcase their talents.\",\n  \"startDate\": \"2026-07-25T09:00:00Z\",\n  \"endDate\": \"2026-07-25T14:00:00Z\",\n  \"location\": \"School Hall\"\n}",
-              "options": { "raw": { "language": "json" } }
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
             }
-          }
-        },
-        {
-          "name": "Update Event",
-          "request": {
-            "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/events/:id", "host": ["{{baseUrl}}"], "path": ["api","events",":id"], "variable": [{ "key": "id", "value": "" }] },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"ONGOING\"\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "description": "`status`: UPCOMING | ONGOING | COMPLETED | CANCELLED"
-          }
-        },
-        {
-          "name": "Delete Event",
-          "request": {
-            "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/events/:id", "host": ["{{baseUrl}}"], "path": ["api","events",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Messages",
-      "description": "All authenticated users.",
-      "item": [
-        {
-          "name": "List Messages",
+          ],
+          "id": "1996af62-4394-402e-b807-208c84fa7ae2",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/messages?page=1&limit=20&type=received",
-              "host": ["{{baseUrl}}"], "path": ["api","messages"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "20" },
-                { "key": "type", "value": "received", "description": "sent | received | all" },
-                { "key": "partnerId", "value": "", "disabled": true, "description": "Filter by conversation partner" }
+              "raw": "{{baseUrl}}/api/v1/events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "events",
+                "{{eventId}}"
               ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-1996af62-4394-402e-b807-208c84fa7ae2"
         },
         {
-          "name": "Get Message",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/messages/:id", "host": ["{{baseUrl}}"], "path": ["api","messages",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
-        },
-        {
-          "name": "Send Message",
+          "name": "Create Event (SCHOOL_ADMIN/STAFF)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403 (SUPER_ADMIN cannot create events)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "id": "514a1e3f-9b99-429b-b360-453427020ca9",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/messages", "host": ["{{baseUrl}}"], "path": ["api","messages"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"receiverId\": \"\",\n  \"subject\": \"Progress Report\",\n  \"body\": \"Your child is doing great this term!\",\n  \"schoolId\": \"{{schoolId}}\"\n}",
-              "options": { "raw": { "language": "json" } }
-            }
-          }
+              "raw": "{\n  \"title\": \"End of Term Concert\",\n  \"description\": \"Students showcase their talents.\",\n  \"startDate\": \"2026-09-25T09:00:00.000Z\",\n  \"endDate\": \"2026-09-25T14:00:00.000Z\",\n  \"location\": \"School Hall\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "events"
+              ]
+            },
+            "description": "`startDate` and `endDate` must be ISO 8601 datetime strings."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-514a1e3f-9b99-429b-b360-453427020ca9"
         },
         {
-          "name": "Mark Conversation as Read",
+          "name": "Update Event (SCHOOL_ADMIN/STAFF)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403 or 404 (SUPER_ADMIN cannot update events)', () => pm.expect(pm.response.code).to.be.oneOf([403, 404]));"
+                ]
+              }
+            }
+          ],
+          "id": "598cf517-0ba4-470c-afdd-c03de3e2cc75",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/messages/read-conversation", "host": ["{{baseUrl}}"], "path": ["api","messages","read-conversation"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"partnerId\": \"\"\n}",
-              "options": { "raw": { "language": "json" } }
-            }
-          }
+              "raw": "{\n  \"title\": \"End of Term Concert (Updated)\",\n  \"status\": \"ONGOING\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "events",
+                "{{eventId}}"
+              ]
+            },
+            "description": "`status`: UPCOMING | ONGOING | COMPLETED | CANCELLED"
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-598cf517-0ba4-470c-afdd-c03de3e2cc75"
         },
         {
-          "name": "Delete Message",
+          "name": "Delete Event (SCHOOL_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403 or 404 (SUPER_ADMIN cannot delete events)', () => pm.expect(pm.response.code).to.be.oneOf([403, 404]));"
+                ]
+              }
+            }
+          ],
+          "id": "96f0c2e7-2f25-4e25-b98d-436277b92dee",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/messages/:id", "host": ["{{baseUrl}}"], "path": ["api","messages",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "events",
+                "{{eventId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-96f0c2e7-2f25-4e25-b98d-436277b92dee"
         }
-      ]
-    },
-    {
-      "name": "Notifications",
-      "description": "All authenticated users.",
-      "item": [
-        {
-          "name": "List Notifications",
-          "request": {
-            "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/notifications", "host": ["{{baseUrl}}"], "path": ["api","notifications"] }
-          }
-        },
-        {
-          "name": "Mark Notification as Read",
-          "request": {
-            "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/api/notifications/:id/read", "host": ["{{baseUrl}}"], "path": ["api","notifications",":id","read"], "variable": [{ "key": "id", "value": "" }] }
-          }
-        },
-        {
-          "name": "Mark All Notifications as Read",
-          "request": {
-            "method": "PATCH",
-            "url": { "raw": "{{baseUrl}}/api/notifications/read-all", "host": ["{{baseUrl}}"], "path": ["api","notifications","read-all"] }
-          }
-        }
-      ]
+      ],
+      "id": "4a9a4479-c848-4c55-bc2e-d4fde733c086",
+      "description": "All authenticated users can read. SCHOOL_ADMIN/STAFF can create and update. Only SCHOOL_ADMIN can delete.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-4a9a4479-c848-4c55-bc2e-d4fde733c086"
     },
     {
       "name": "Posts",
-      "description": "All authenticated users.",
       "item": [
         {
           "name": "List Posts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.length > 0) pm.collectionVariables.set('postId', b.data[0].id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "828766c9-d30a-45f9-b2ab-25b150eb6182",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/posts?page=1&limit=20",
-              "host": ["{{baseUrl}}"], "path": ["api","posts"],
+              "raw": "{{baseUrl}}/api/v1/posts?page=1&limit=20&schoolId={{schoolId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "20" },
-                { "key": "search", "value": "", "disabled": true }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "schoolId",
+                  "value": "{{schoolId}}",
+                  "description": "Required for SUPER_ADMIN (no school context)"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
               ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-828766c9-d30a-45f9-b2ab-25b150eb6182"
         },
         {
           "name": "Get Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "08455702-20c9-4d95-8625-aa5a8a6f665c",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/posts/:id", "host": ["{{baseUrl}}"], "path": ["api","posts",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/posts/{{postId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts",
+                "{{postId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-08455702-20c9-4d95-8625-aa5a8a6f665c"
         },
         {
           "name": "Create Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403 (SUPER_ADMIN cannot create posts)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "id": "65518f57-6bda-4979-9f5e-f52c5989f55b",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/posts", "host": ["{{baseUrl}}"], "path": ["api","posts"] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"content\": \"School resumption is Monday 21st July. All students are expected to arrive by 8am.\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts"
+              ]
             }
-          }
-        },
-        {
-          "name": "Delete Post",
-          "request": {
-            "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/posts/:id", "host": ["{{baseUrl}}"], "path": ["api","posts",":id"], "variable": [{ "key": "id", "value": "" }] }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-65518f57-6bda-4979-9f5e-f52c5989f55b"
         },
         {
           "name": "List Comments on Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 404 (no post for SUPER_ADMIN)', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));"
+                ]
+              }
+            }
+          ],
+          "id": "ddc40f7e-45f2-4e4d-bef2-02b1dba16886",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{baseUrl}}/api/posts/:id/comments", "host": ["{{baseUrl}}"], "path": ["api","posts",":id","comments"], "variable": [{ "key": "id", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-ddc40f7e-45f2-4e4d-bef2-02b1dba16886"
         },
         {
           "name": "Add Comment to Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403 or 404 (SUPER_ADMIN blocked or post not found)', () => pm.expect(pm.response.code).to.be.oneOf([403, 404]));"
+                ]
+              }
+            }
+          ],
+          "id": "8603547a-0402-4202-b1f7-3934abc23ec0",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "url": { "raw": "{{baseUrl}}/api/posts/:id/comments", "host": ["{{baseUrl}}"], "path": ["api","posts",":id","comments"], "variable": [{ "key": "id", "value": "" }] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"content\": \"Thank you for the update!\",\n  \"parentCommentId\": null\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"content\": \"Thank you for the update!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "description": "Set `parentCommentId` to reply to an existing comment, or omit it for a top-level comment."
-          }
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            },
+            "description": "Omit `parentCommentId` for a top-level comment. Set it to reply to an existing comment."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-8603547a-0402-4202-b1f7-3934abc23ec0"
+        },
+        {
+          "name": "Reply to Comment (nested)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 201, 403 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 403, 404]));"
+                ]
+              }
+            }
+          ],
+          "id": "c44a7dbf-7e36-4152-b841-cc153b7726ba",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"I agree, very helpful!\",\n  \"parentCommentId\": \"{{commentId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/posts/{{postId}}/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts",
+                "{{postId}}",
+                "comments"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-c44a7dbf-7e36-4152-b841-cc153b7726ba"
         },
         {
           "name": "Delete Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403 or 404 (SUPER_ADMIN cannot delete comments)', () => pm.expect(pm.response.code).to.be.oneOf([403, 404]));"
+                ]
+              }
+            }
+          ],
+          "id": "a771cc8d-9c07-4510-8235-93eb8f0c3358",
           "request": {
             "method": "DELETE",
-            "url": { "raw": "{{baseUrl}}/api/posts/:id/comments/:commentId", "host": ["{{baseUrl}}"], "path": ["api","posts",":id","comments",":commentId"], "variable": [{ "key": "id", "value": "" }, { "key": "commentId", "value": "" }] }
-          }
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/posts/{{postId}}/comments/{{commentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts",
+                "{{postId}}",
+                "comments",
+                "{{commentId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-a771cc8d-9c07-4510-8235-93eb8f0c3358"
+        },
+        {
+          "name": "Delete Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403 or 404 (SUPER_ADMIN cannot delete posts)', () => pm.expect(pm.response.code).to.be.oneOf([403, 404]));"
+                ]
+              }
+            }
+          ],
+          "id": "5368a30d-abfd-44c3-9426-eaace5aca936",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/posts/{{postId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "posts",
+                "{{postId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-5368a30d-abfd-44c3-9426-eaace5aca936"
         }
-      ]
+      ],
+      "id": "fe398fae-fa3f-49cd-8340-d0b3f3711ea1",
+      "description": "All authenticated users can create, read, and comment. Users can only delete their own posts/comments.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-fe398fae-fa3f-49cd-8340-d0b3f3711ea1"
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "List Messages (received)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.length > 0) pm.collectionVariables.set('messageId', b.data[0].id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "44a058a9-f155-454a-8969-7bb445e25b75",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages?page=1&limit=20&type=received",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "type",
+                  "value": "received",
+                  "description": "sent | received | all"
+                },
+                {
+                  "key": "partnerId",
+                  "value": "",
+                  "description": "Filter by conversation partner userId",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-44a058a9-f155-454a-8969-7bb445e25b75"
+        },
+        {
+          "name": "List Messages (sent)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "1a463c89-a46c-4d60-b4af-2d1d9c7b3f55",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages?page=1&limit=20&type=sent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "type",
+                  "value": "sent"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-1a463c89-a46c-4d60-b4af-2d1d9c7b3f55"
+        },
+        {
+          "name": "Get Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "608d706f-9094-4d71-a412-a44be5069331",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages/{{messageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "messages",
+                "{{messageId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-608d706f-9094-4d71-a412-a44be5069331"
+        },
+        {
+          "name": "Send Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 201 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 201, 404]));"
+                ]
+              }
+            }
+          ],
+          "id": "0f36b19b-59c4-4436-8d11-2edd7e712da7",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receiverId\": \"{{staffId}}\",\n  \"subject\": \"Progress Report\",\n  \"body\": \"Your child is doing great this term!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "messages"
+              ]
+            },
+            "description": "`receiverId` is required. `subject` and `schoolId` are optional."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-0f36b19b-59c4-4436-8d11-2edd7e712da7"
+        },
+        {
+          "name": "Mark Conversation as Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "6d782ecd-4007-41fe-bd73-e07905c6f145",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"partnerId\": \"{{staffId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages/read-conversation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "messages",
+                "read-conversation"
+              ]
+            },
+            "description": "Marks all messages in the conversation with `partnerId` as read."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-6d782ecd-4007-41fe-bd73-e07905c6f145"
+        },
+        {
+          "name": "Delete Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200, 204 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 204, 404]));"
+                ]
+              }
+            }
+          ],
+          "id": "423af4a0-9fce-4b76-8f0f-e547d4281191",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/messages/{{messageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "messages",
+                "{{messageId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-423af4a0-9fce-4b76-8f0f-e547d4281191"
+        }
+      ],
+      "id": "53902c73-13d1-410b-a0cc-88739d7fb3f7",
+      "description": "All authenticated users.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-53902c73-13d1-410b-a0cc-88739d7fb3f7"
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get Unread Count",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('Has count', () => pm.expect(b.data).to.have.property('count'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "unread-count"
+              ]
+            },
+            "description": "Returns the number of unread notifications for the authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "List Notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "const b = pm.response.json();",
+                  "if (b.data && b.data.length > 0) pm.collectionVariables.set('notificationId', b.data[0].id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "9d3d4706-ab13-4db1-ae20-4b2143e2b119",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-9d3d4706-ab13-4db1-ae20-4b2143e2b119"
+        },
+        {
+          "name": "Mark Notification as Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));"
+                ]
+              }
+            }
+          ],
+          "id": "2608242c-c8d2-4d2d-97f7-78573b9e5156",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/{{notificationId}}/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "{{notificationId}}",
+                "read"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-2608242c-c8d2-4d2d-97f7-78573b9e5156"
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "d278573f-bfa4-49dc-b53c-0d20fe862e13",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "read-all"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-d278573f-bfa4-49dc-b53c-0d20fe862e13"
+        }
+      ],
+      "id": "a50ff603-86d7-4ee5-ae68-d5db136907ea",
+      "description": "All authenticated users.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-a50ff603-86d7-4ee5-ae68-d5db136907ea"
     },
     {
       "name": "Users",
-      "description": "Utility endpoints for all authenticated users.",
       "item": [
         {
           "name": "Search Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "26393b31-36a5-433e-8926-079a41a15621",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/users/search?q=john&schoolId={{schoolId}}",
-              "host": ["{{baseUrl}}"], "path": ["api","users","search"],
+              "raw": "{{baseUrl}}/api/v1/users/search?q=john",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "search"
+              ],
               "query": [
-                { "key": "q", "value": "john", "description": "Search by name or email" },
-                { "key": "schoolId", "value": "{{schoolId}}" }
+                {
+                  "key": "q",
+                  "value": "john",
+                  "description": "Search by first or last name (max 50 chars). Results scoped to the user's school."
+                }
+              ]
+            },
+            "description": "Results are scoped to the authenticated user's school. Returns up to 10 matches."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-26393b31-36a5-433e-8926-079a41a15621"
+        }
+      ],
+      "id": "0ec43073-0606-4c8c-be7a-9c579b57d22f",
+      "description": "Utility endpoints for all authenticated users.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-0ec43073-0606-4c8c-be7a-9c579b57d22f"
+    },
+    {
+      "name": "Teardown",
+      "item": [
+        {
+          "name": "Delete Classroom",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 204', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "f4edd5e1-2ea1-4e0d-be0a-993ca069a0fe",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/classrooms/{{classroomId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "classrooms",
+                "{{classroomId}}"
               ]
             }
-          }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-f4edd5e1-2ea1-4e0d-be0a-993ca069a0fe"
+        },
+        {
+          "name": "Delete Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 204', () => pm.expect(pm.response.code).to.be.oneOf([200, 204]));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "0e46f1b8-7b89-4e2b-a5aa-2a2073c50a67",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/students/{{studentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "students",
+                "{{studentId}}"
+              ]
+            }
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-0e46f1b8-7b89-4e2b-a5aa-2a2073c50a67"
+        },
+        {
+          "name": "Reset Password to Original (Admin@1234)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "604a9af8-9ead-4d84-9468-887914ffea31",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Admin@5678\",\n  \"newPassword\": \"Admin@1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "change-password"
+              ]
+            },
+            "description": "Restores the SUPER_ADMIN password changed during the Auth / Change Password test."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-604a9af8-9ead-4d84-9468-887914ffea31"
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set('token', '');",
+                  "  pm.collectionVariables.set('refreshToken', '');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "id": "fa8a5950-4bdf-4625-a240-06e293a8237e",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Invalidates the current session. Token is cleared from collection variables on success."
+          },
+          "response": [],
+          "createdAt": "2026-08-11T18:15:29.000Z",
+          "updatedAt": "2026-08-11T18:15:29.000Z",
+          "uid": "11087619-fa8a5950-4bdf-4625-a240-06e293a8237e"
         }
-      ]
+      ],
+      "id": "9f159e2c-6c46-468d-86b7-4c846fd18488",
+      "description": "Runs last — resets the SUPER_ADMIN password to the original value and invalidates the session.",
+      "createdAt": "2026-08-11T18:15:29.000Z",
+      "updatedAt": "2026-08-11T18:15:29.000Z",
+      "uid": "11087619-9f159e2c-6c46-468d-86b7-4c846fd18488"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://staging-api.tegbale.com"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "schoolId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "staffId",
+      "value": ""
+    },
+    {
+      "key": "teacherId",
+      "value": ""
+    },
+    {
+      "key": "classroomId",
+      "value": ""
+    },
+    {
+      "key": "studentId",
+      "value": ""
+    },
+    {
+      "key": "parentId",
+      "value": ""
+    },
+    {
+      "key": "eventId",
+      "value": ""
+    },
+    {
+      "key": "postId",
+      "value": ""
+    },
+    {
+      "key": "commentId",
+      "value": ""
+    },
+    {
+      "key": "messageId",
+      "value": ""
+    },
+    {
+      "key": "notificationId",
+      "value": ""
+    },
+    {
+      "key": "requestId",
+      "value": ""
     }
   ]
 }
