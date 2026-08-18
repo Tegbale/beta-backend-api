@@ -9,6 +9,11 @@ import { env } from '../../config/env';
 import { LoginInput, RegisterInput, ChangePasswordInput, ForgotPasswordInput, ResetPasswordInput } from './auth.schema';
 
 export const register = async (input: RegisterInput) => {
+  if (input.role === 'SUPER_ADMIN') {
+    const existingSuperAdmin = await prisma.user.findFirst({ where: { role: 'SUPER_ADMIN' } });
+    if (existingSuperAdmin) throw new AppError('A Super Admin already exists', 409);
+  }
+
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
   if (existing) throw new AppError('Email already in use', 409);
 
