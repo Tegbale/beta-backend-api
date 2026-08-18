@@ -4,7 +4,7 @@ import { hashPassword } from '../../utils/password';
 import { generatePassword } from '../../utils/generatePassword';
 import { sendMail } from '../../lib/mailer';
 import { requestReceivedEmail, newRequestNotificationEmail, accountCreatedEmail } from '../../lib/emailTemplates';
-import { uploadBuffer } from '../../lib/storage';
+import { uploadBuffer, signCloudinaryUrl } from '../../lib/storage';
 import { AppError } from '../../middleware/errorHandler';
 import { env } from '../../config/env';
 import { CreateRequestInput, ListRequestsQuery, RejectRequestInput } from './school-requests.schema';
@@ -52,22 +52,24 @@ export const createRequest = async (input: CreateRequestInput, docs?: UploadedDo
     requestReceivedEmail(contactName, input.schoolName),
   ).catch(() => {});
 
-  sendMail(
-    env.mailgun.superadminEmail,
-    `New school request: ${input.schoolName}`,
-    newRequestNotificationEmail(
-      input.schoolName,
-      contactName,
-      input.contactEmail,
-      input.contactPhone,
-      input.city,
-      input.country,
-      input.message,
-      request.id,
-      cacDocumentUrl,
-      govtDocumentUrl,
-    ),
-  ).catch(() => {});
+  Promise.all([signCloudinaryUrl(cacDocumentUrl), signCloudinaryUrl(govtDocumentUrl)]).then(([signedCac, signedGovt]) => {
+    sendMail(
+      env.mailgun.superadminEmail,
+      `New school request: ${input.schoolName}`,
+      newRequestNotificationEmail(
+        input.schoolName,
+        contactName,
+        input.contactEmail,
+        input.contactPhone,
+        input.city,
+        input.country,
+        input.message,
+        request.id,
+        signedCac ?? undefined,
+        signedGovt ?? undefined,
+      ),
+    ).catch(() => {});
+  }).catch(() => {});
 
   return request;
 };
@@ -77,10 +79,18 @@ export const listRequests = async (query: ListRequestsQuery) => {
   const skip = (page - 1) * limit;
   const where = status ? { status } : {};
 
-  const [requests, total] = await prisma.$transaction([
+  const [rawRequests, total] = await prisma.$transaction([
     prisma.schoolRequest.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }),
     prisma.schoolRequest.count({ where }),
   ]);
+
+  const requests = await Promise.all(
+    rawRequests.map(async (r) => ({
+      ...r,
+      cacDocumentUrl: (await signCloudinaryUrl(r.cacDocumentUrl)) ?? r.cacDocumentUrl,
+      govtDocumentUrl: (await signCloudinaryUrl(r.govtDocumentUrl)) ?? r.govtDocumentUrl,
+    }))
+  );
 
   return { requests, total, page, limit };
 };
@@ -88,7 +98,15 @@ export const listRequests = async (query: ListRequestsQuery) => {
 export const getRequest = async (id: string) => {
   const request = await prisma.schoolRequest.findUnique({ where: { id } });
   if (!request) throw new AppError('Request not found', 404);
-  return request;
+  const [cacDocumentUrl, govtDocumentUrl] = await Promise.all([
+    signCloudinaryUrl(request.cacDocumentUrl),
+    signCloudinaryUrl(request.govtDocumentUrl),
+  ]);
+  return {
+    ...request,
+    cacDocumentUrl: cacDocumentUrl ?? request.cacDocumentUrl,
+    govtDocumentUrl: govtDocumentUrl ?? request.govtDocumentUrl,
+  };
 };
 
 export const approveRequest = async (id: string) => {

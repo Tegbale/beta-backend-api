@@ -1,5 +1,28 @@
 import { env } from '../config/env';
 
+export async function signCloudinaryUrl(url: string | null | undefined): Promise<string | null> {
+  if (!url || env.storage.provider !== 'cloudinary' || !url.includes('cloudinary.com')) return url ?? null;
+
+  const match = url.match(/cloudinary\.com\/[^/]+\/([^/]+)\/upload\/v(\d+)\/(.+)$/);
+  if (!match) return url;
+
+  const [, resourceType, version, publicId] = match;
+  const { v2: cloudinary } = await import('cloudinary');
+  cloudinary.config({
+    cloud_name: env.cloudinary.cloudName,
+    api_key: env.cloudinary.apiKey,
+    api_secret: env.cloudinary.apiSecret,
+  });
+
+  return cloudinary.url(publicId, {
+    resource_type: resourceType as 'image' | 'video' | 'raw',
+    type: 'upload',
+    sign_url: true,
+    secure: true,
+    version: parseInt(version, 10),
+  }) ?? url;
+}
+
 export async function uploadBuffer(
   buffer: Buffer,
   folder: string,
