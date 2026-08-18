@@ -6,10 +6,9 @@ export async function generateCloudinaryDownloadUrl(url: string): Promise<string
   const match = url.match(/cloudinary\.com\/[^/]+\/([^/]+)\/upload\/v\d+\/(.+)$/);
   if (!match) return null;
 
-  const [, resourceType, publicIdWithExt] = match;
-  const dotIdx = publicIdWithExt.lastIndexOf('.');
-  const format = dotIdx >= 0 ? publicIdWithExt.slice(dotIdx + 1) : '';
-  const publicId = dotIdx >= 0 ? publicIdWithExt.slice(0, dotIdx) : publicIdWithExt;
+  // For raw resources, the file extension is part of the public_id in Cloudinary's system.
+  // Passing the full path as public_id and an empty format avoids a 404 from the download API.
+  const [, resourceType, publicId] = match;
 
   const { v2: cloudinary } = await import('cloudinary');
   cloudinary.config({
@@ -18,9 +17,7 @@ export async function generateCloudinaryDownloadUrl(url: string): Promise<string
     api_secret: env.cloudinary.apiSecret,
   });
 
-  // private_download_url uses api.cloudinary.com (API credentials, not CDN)
-  // This bypasses all CDN delivery restrictions on the Cloudinary account
-  return (cloudinary.utils as any).private_download_url(publicId, format, {
+  return (cloudinary.utils as any).private_download_url(publicId, '', {
     resource_type: resourceType,
     type: 'upload',
     expires_at: Math.floor(Date.now() / 1000) + 300,
