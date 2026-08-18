@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "c2d0974d-4253-4296-9c03-fcb6db02dbb8",
-    "name": "T\u00e8gbal\u00e9 API",
-    "description": "Complete API test suite for the T\u00e8gbal\u00e9 School Management Platform.\n\n**Setup:**\n1. `baseUrl` is already set to `https://staging-api.tegbale.com`\n2. Run **Login** \u2014 the test script auto-saves the token to `{{token}}` and `{{refreshToken}}`\n3. All authenticated requests use `Bearer {{token}}` automatically\n4. After creating resources, copy returned IDs into the collection variables\n\n**Roles:** SUPER_ADMIN \u00b7 SCHOOL_ADMIN \u00b7 STAFF \u00b7 TEACHER \u00b7 PARENT\n\n**Typical happy-path flow:**\n1. Health Check \u2192 Login \u2192 Get Me\n2. Create School \u2192 Create Staff \u2192 Create Classroom\n3. Create Student \u2192 Assign to Classroom\n4. Create Parent \u2192 Assign Ward\n5. Create Event \u2192 Create Post \u2192 Send Message",
+    "name": "Tègbalé API",
+    "description": "Complete API test suite for the Tègbalé School Management Platform.\n\n**Setup:**\n1. `baseUrl` is already set to `https://staging-api.tegbale.com`\n2. Run **Login** — the test script auto-saves the token to `{{token}}` and `{{refreshToken}}`\n3. All authenticated requests use `Bearer {{token}}` automatically\n4. After creating resources, copy returned IDs into the collection variables\n\n**Roles:** SUPER_ADMIN · SCHOOL_ADMIN · STAFF · TEACHER · PARENT\n\n**Typical happy-path flow:**\n1. Health Check → Login → Get Me\n2. Create School → Create Staff → Create Classroom\n3. Create Student → Assign to Classroom\n4. Create Parent → Assign Ward\n5. Create Event → Create Post → Send Message",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "createdAt": "2026-07-14T15:55:05.000Z",
     "updatedAt": "2026-08-13T15:13:34.000Z",
@@ -43,7 +43,7 @@
                 "health"
               ]
             },
-            "description": "Public \u2014 no auth required. Returns server status and timestamp."
+            "description": "Public — no auth required. Returns server status and timestamp."
           },
           "response": [],
           "createdAt": "2026-08-11T18:15:29.000Z",
@@ -407,7 +407,7 @@
                 {
                   "key": "avatar",
                   "type": "file",
-                  "description": "Image file \u2014 JPG, PNG, or WebP, max 5 MB",
+                  "description": "Image file — JPG, PNG, or WebP, max 5 MB",
                   "value": ""
                 }
               ]
@@ -737,7 +737,7 @@
                 "school-requests"
               ]
             },
-            "description": "Public endpoint \u2014 no auth needed. Send as `multipart/form-data`. Files are uploaded to Cloudinary."
+            "description": "Public endpoint — no auth needed. Send as `multipart/form-data`. Files are uploaded to Cloudinary."
           },
           "response": [],
           "createdAt": "2026-08-11T18:15:29.000Z",
@@ -1512,7 +1512,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\\n  \\\"firstName\\\": \\\"Chidi\\\",\\n  \\\"lastName\\\": \\\"Nwosu\\\",\\n  \\\"phone\\\": \\\"+2348099887766\\\",\\n  \\\"jobTitle\\\": \\\"School Nurse\\\"\\n}",
+              "raw": "{\n  \"firstName\": \"Chidi\",\n  \"lastName\": \"Nwosu\",\n  \"phone\": \"+2348099887766\",\n  \"jobTitle\": \"School Nurse\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4015,7 +4015,7 @@
         }
       ],
       "id": "9f159e2c-6c46-468d-86b7-4c846fd18488",
-      "description": "Runs last \u2014 resets the SUPER_ADMIN password to the original value and invalidates the session.",
+      "description": "Runs last — resets the SUPER_ADMIN password to the original value and invalidates the session.",
       "createdAt": "2026-08-11T18:15:29.000Z",
       "updatedAt": "2026-08-11T18:15:29.000Z",
       "uid": "11087619-9f159e2c-6c46-468d-86b7-4c846fd18488"
