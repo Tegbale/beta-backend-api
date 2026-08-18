@@ -4,3 +4,5 @@ dist/
 *.log
 Tegbale_API.postman_collection.json
 CLAUDE.md
+.claude/
+.mcp*
