@@ -130,7 +130,7 @@ export const approveRequest = async (id: string) => {
     return { school, admin };
   });
 
-  const loginUrl = `${env.frontendUrl}/login`;
+  const loginUrl = `${env.schoolAdminUrl}/login`;
   sendMail(
     admin.email,
     'Your Tègbalé school account is ready',

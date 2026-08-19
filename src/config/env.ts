@@ -25,6 +25,7 @@ export const env = {
     .map((o) => o.trim().replace(/\/$/, '')),
 
   frontendUrl: (process.env.FRONTEND_URL ?? 'http://localhost:5173').replace(/\/$/, ''),
+  schoolAdminUrl: (process.env.SCHOOL_ADMIN_URL ?? process.env.FRONTEND_URL ?? 'http://localhost:5174').replace(/\/$/, ''),
 
   mailgun: {
     apiKey: required('MAILGUN_API_KEY'),

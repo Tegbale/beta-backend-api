@@ -83,7 +83,7 @@ export const createStaff = async (schoolId: string | null | undefined, input: Cr
   }
 
   // STAFF role users log in via the web portal; TEACHER/other roles use the mobile app
-  const loginUrl = input.role === 'STAFF' ? `${env.frontendUrl}/login` : undefined;
+  const loginUrl = input.role === 'STAFF' ? `${env.schoolAdminUrl}/login` : undefined;
 
   sendMail(
     user.email,
